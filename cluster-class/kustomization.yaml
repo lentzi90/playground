@@ -1,0 +1,27 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- capo-class.yaml
+- kubeadmconfigtemplate.yaml
+- kubeadmcontrolplanetemplate.yaml
+- openstackclustertemplate.yaml
+- openstackmachinetemplates.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+secretGenerator:
+- files:
+  - clouds.yaml
+  name: lennart-test-cloud-config
+  type: Opaque
+
+# Add label for moving the lennart-test-cloud-config secret with clusterctl move.
+patches:
+- patch: |-
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: lennart-test-cloud-config
+      labels:
+        clusterctl.cluster.x-k8s.io/move: "true"
