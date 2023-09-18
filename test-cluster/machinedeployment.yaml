@@ -1,0 +1,23 @@
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: MachineDeployment
+metadata:
+  name: lennart-test-md-0
+spec:
+  clusterName: lennart-test
+  replicas: 1
+  selector:
+    matchLabels: null
+  template:
+    spec:
+      bootstrap:
+        configRef:
+          apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+          kind: KubeadmConfigTemplate
+          name: lennart-test-md-0
+      clusterName: lennart-test
+      failureDomain: nova
+      infrastructureRef:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1alpha7
+        kind: OpenStackMachineTemplate
+        name: lennart-test-md-0-v1.27.5
+      version: v1.27.5

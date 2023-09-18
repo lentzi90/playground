@@ -1,0 +1,30 @@
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1alpha7
+kind: OpenStackMachineTemplate
+metadata:
+  name: lennart-test-control-plane-v1.27.5
+spec:
+  template:
+    spec:
+      cloudName: lennart-test
+      flavor: 4C-4GB-100GB
+      identityRef:
+        kind: Secret
+        name: lennart-test-cloud-config
+      image: ubuntu-2204-kube-v1.27.5
+      sshKeyName: lennart-ed25519
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1alpha7
+kind: OpenStackMachineTemplate
+metadata:
+  name: lennart-test-md-0-v1.27.5
+spec:
+  template:
+    spec:
+      cloudName: lennart-test
+      flavor: 4C-4GB-100GB
+      identityRef:
+        kind: Secret
+        name: lennart-test-cloud-config
+      image: ubuntu-2204-kube-v1.27.5
+      sshKeyName: lennart-ed25519
