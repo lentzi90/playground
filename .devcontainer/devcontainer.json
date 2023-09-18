@@ -1,0 +1,46 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/go
+{
+	"name": "Ubuntu",
+	"image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+	// Configure tool-specific properties.
+	"customizations": {
+		// Configure properties specific to VS Code.
+		"vscode": {
+			// Set *default* container specific settings.json values on container create.
+			"settings": {
+				"go.toolsManagement.checkForUpdates": "local",
+				"go.useLanguageServer": true,
+				"go.gopath": "/go"
+			}
+		}
+	},
+	"features": {
+		"ghcr.io/devcontainers/features/go:1": {
+			"version": "1.21"
+		},
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {},
+		"ghcr.io/mpriscella/features/kind:1": {},
+		"ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {},
+		"ghcr.io/lentzi90/features/clusterctl:0": {},
+		"ghcr.io/lentzi90/features/tilt:0": {}
+	},
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": "./.devcontainer/postCreateCommand.sh",
+	"mounts": [
+		{
+			"source": "${localEnv:HOME}/.config/openstack",
+			// containerEnv variables are not available when mounting, so we cannot use them here.
+			"target": "/etc/openstack",
+			"type": "bind"
+		},
+		{
+			"source": "${localEnv:HOME}/.ssh",
+			// containerEnv variables are not available when mounting, so we cannot use them here.
+			"target": "/home/vscode/.ssh",
+			"type": "bind"
+		}
+	]
+}
