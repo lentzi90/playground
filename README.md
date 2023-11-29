@@ -4,15 +4,17 @@ Random stuff that I may want to store for later
 
 ## CAPO cluster-class
 
+Create a `clouds.yaml` file in `CAPO/cluster-class`.
+
 ```bash
 kind create cluster
 export CLUSTER_TOPOLOGY=true
 clusterctl init --infrastructure=openstack
 # Create cluster-class/clouds.yaml file to be used by CAPO
 # Apply the cluster-class
-kubectl apply -k cluster-class
+kubectl apply -k CAPO/cluster-class
 # Create a cluster
-kubectl apply -f cluster.yaml
+kubectl apply -f CAPO/cluster.yaml
 ```
 
 ### CNI and external cloud provider
@@ -31,8 +33,21 @@ domain-name=TODO
 ```bash
 # Get the workload cluster kubeconfig
 clusterctl kubeconfig lennart-test > kubeconfig.yaml
-kubectl --kubeconfig=kubeconfig.yaml apply -k cluster-resources
+kubectl --kubeconfig=kubeconfig.yaml apply -k CAPO/cluster-resources
 ```
+
+## CAPO cluster
+
+Create a `clouds.yaml` file in `CAPO/test-cluster`.
+Then apply the cluster:
+
+```bash
+kind create cluster
+clusterctl init --infrastructure=openstack
+kubectl apply -k CAPO/test-cluster
+```
+
+The same CNI and external cloud provider as above can be used here also.
 
 ## CAPI In-memory provider
 
