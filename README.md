@@ -6,10 +6,32 @@ Random stuff that I may want to store for later
 
 ```bash
 kind create cluster
+export CLUSTER_TOPOLOGY=true
 clusterctl init --infrastructure=openstack
 # Create cluster-class/clouds.yaml file to be used by CAPO
 # Apply the cluster-class
 kubectl apply -k cluster-class
+# Create a cluster
+kubectl apply -f cluster.yaml
+```
+
+### CNI and external cloud provider
+
+Create cluster-resources/cloud.conf file to be used by the external cloud provider.
+
+```ini
+[Global]
+auth-url=TODO
+application-credential-id=TODO
+application-credential-secret=TODO
+region=TODO
+domain-name=TODO
+```
+
+```bash
+# Get the workload cluster kubeconfig
+clusterctl kubeconfig lennart-test > kubeconfig.yaml
+kubectl --kubeconfig=kubeconfig.yaml apply -k cluster-resources
 ```
 
 ## CAPI In-memory provider
