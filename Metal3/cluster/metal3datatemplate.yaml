@@ -1,0 +1,88 @@
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: Metal3DataTemplate
+metadata:
+  name: test-1-controlplane-template
+  namespace: default
+spec:
+  clusterName: test-1
+  metaData:
+    gatewaysFromIPPool:
+    - apiGroup: ipam.metal3.io
+      key: Gateway_For_Net_ipv4
+      kind: IPPool
+      name: control-plane-endpoint
+    indexes:
+    - key: machine_index
+      step: 1
+    ipAddressesFromIPPool:
+    - apiGroup: ipam.metal3.io
+      key: IP_For_Net_ipv4
+      kind: IPPool
+      name: control-plane-endpoint
+    objectNames:
+    - key: machine_name
+      object: machine
+    - key: metal3machine_name
+      object: metal3machine
+    - key: bmh_name
+      object: baremetalhost
+    prefixesFromIPPool:
+    - apiGroup: ipam.metal3.io
+      key: Prefix_For_Net_ipv4
+      kind: IPPool
+      name: control-plane-endpoint
+  # networkData:
+  #   links:
+  #     ethernets:
+  #       - type: phy
+  #         id: enp1s0
+  #         macAddress:
+  #           fromHostInterface: enp1s0
+  #   networks:
+  #     ipv4:
+  #       - id: kcpv4
+  #         link: enp1s0
+  #         ipAddressFromIPPool: control-plane-endpoint
+  #         routes:
+  #           - network: 0.0.0.0
+  #             prefix: 0
+  #             gateway:
+  #               fromIPPool: control-plane-endpoint
+  #   services:
+  #     dns:
+  #       - 8.8.8.8
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: Metal3DataTemplate
+metadata:
+  name: test-1-workers-template
+  namespace: default
+spec:
+  clusterName: test-1
+  metaData:
+    gatewaysFromIPPool:
+    - apiGroup: ipam.metal3.io
+      key: Gateway_For_Net_ipv4
+      kind: IPPool
+      name: netpool-ipv4
+    indexes:
+    - key: machine_index
+      step: 1
+    ipAddressesFromIPPool:
+    - apiGroup: ipam.metal3.io
+      key: IP_For_Net_ipv4
+      kind: IPPool
+      name: netpool-ipv4
+    objectNames:
+    - key: machine_name
+      object: machine
+    - key: metal3machine_name
+      object: metal3machine
+    - key: bmh_name
+      object: baremetalhost
+    prefixesFromIPPool:
+    - apiGroup: ipam.metal3.io
+      key: Prefix_For_Net_ipv4
+      kind: IPPool
+      name: netpool-ipv4
+  templateReference: test-1-workers

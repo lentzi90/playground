@@ -70,3 +70,53 @@ do
   sed "s/in-memory-test/${name}/g" in-memory-cluster.yaml | kubectl apply -f -
 done
 ```
+
+## Image-builder
+
+Build node images using qemu.
+Create a file with variables:
+
+```json
+{
+  "iso_checksum": "a4acfda10b18da50e2ec50ccaf860d7f20b389df8765611142305c0e911d16fd",
+  "iso_checksum_type": "sha256",
+  "iso_url": "https://releases.ubuntu.com/jammy/ubuntu-22.04.3-live-server-amd64.iso",
+  "kubernetes_deb_version": "1.28.4-1.1",
+  "kubernetes_rpm_version": "1.28.4",
+  "kubernetes_semver": "v1.28.4",
+  "kubernetes_series": "v1.28"
+}
+```
+
+Build the image:
+
+```bash
+PACKER_VAR_FILES=qemu_vars.json make build-qemu-ubuntu-2204
+```
+
+Convert the image to raw format (otherwise each BMH needs enough memory to load the whole image in order to convert it).
+
+```bash
+qemu-img convert -f qcow2 -O raw output/ubuntu-2204-kube-v1.28.4/ubuntu-2204-kube-v1.28.4 \
+  output/ubuntu-2204-kube-v1.28.4/ubuntu-2204-kube-v1.28.4.raw
+# Calculate the checksum
+sha256 output/ubuntu-2204-kube-v1.28.4/ubuntu-2204-kube-v1.28.4.raw
+```
+
+## Metal3
+
+```bash
+./Metal3/dev-setup.sh
+# Wait for BMO to come up
+# Create BMHs backed by VMs
+NUM_BMH=5 ./Metal3/create-bmhs.sh
+# Apply cluster
+kubectl apply -k Metal3/cluster
+```
+
+Add CNI to make nodes healthy:
+
+```bash
+clusterctl get kubeconfig test-1 > kubeconfig.yaml
+kubectl --kubeconfig=kubeconfig.yaml apply -k Metal3/cni
+```

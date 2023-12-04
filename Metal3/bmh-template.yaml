@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: NAME
+type: Opaque
+stringData:
+  username: admin
+  password: password
+---
+apiVersion: metal3.io/v1alpha1
+kind: BareMetalHost
+metadata:
+  name: NAME
+  labels:
+    bmh-name: NAME
+spec:
+  online: true
+  bmc:
+    address: ipmi://VBMC_IP:VBMC_PORT
+    credentialsName: NAME
+  bootMACAddress: MAC_ADDRESS
+  bootMode: legacy
+  rootDeviceHints:
+    deviceName: /dev/vda
