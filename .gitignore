@@ -11,3 +11,12 @@ hmac-token
 .venv
 
 Metal3/images
+
+ironic-auth-config
+ironic-inspector-auth-config
+ironic-htpasswd
+ironic-inspector-htpasswd
+ironic-password
+ironic-username
+ironic-inspector-password
+ironic-inspector-username

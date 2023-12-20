@@ -28,6 +28,8 @@ docker run --name image-server-e2e -d \
   -p 80:8080 \
   -v "${IMAGE_DIR}:/usr/share/nginx/html" nginxinc/nginx-unprivileged
 
+kubectl create namespace baremetal-operator-system
+
 clusterctl init --infrastructure=metal3
 kubectl apply -k "${REPO_ROOT}/Metal3/ironic"
 kubectl apply -k "${REPO_ROOT}/Metal3/bmo"

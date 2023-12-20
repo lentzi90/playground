@@ -32,7 +32,7 @@ domain-name=TODO
 
 ```bash
 # Get the workload cluster kubeconfig
-clusterctl kubeconfig lennart-test > kubeconfig.yaml
+clusterctl get kubeconfig lennart-test > kubeconfig.yaml
 kubectl --kubeconfig=kubeconfig.yaml apply -k CAPO/cluster-resources
 ```
 
