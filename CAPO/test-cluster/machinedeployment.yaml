@@ -19,5 +19,5 @@ spec:
       infrastructureRef:
         apiVersion: infrastructure.cluster.x-k8s.io/v1alpha7
         kind: OpenStackMachineTemplate
-        name: lennart-test-md-0-v1.27.5
-      version: v1.27.5
+        name: lennart-test-md-0-v1-28-1
+      version: v1.28.1
