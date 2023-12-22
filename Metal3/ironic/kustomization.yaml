@@ -3,6 +3,7 @@ kind: Kustomization
 namespace: baremetal-operator-system
 resources:
 - https://github.com/metal3-io/baremetal-operator/ironic-deployment/overlays/basic-auth_tls?ref=main
+- service.yaml
 
 configMapGenerator:
 - envs:
@@ -31,11 +32,11 @@ secretGenerator:
   - auth-config=ironic-inspector-auth-config
 
 replacements:
-  # Replace IRONIC_HOST_IP in certificates with the PROVISIONING_IP from the configmap
+  # Replace IRONIC_HOST_IP in certificates with the IRONIC_HOST_IP from the configmap
   - source:
       kind: ConfigMap
       name: ironic-bmo-configmap
-      fieldPath: .data.PROVISIONING_IP
+      fieldPath: .data.IRONIC_HOST_IP
     targets:
       - select:
           version: v1

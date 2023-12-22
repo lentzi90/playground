@@ -30,6 +30,9 @@ docker run --name image-server-e2e -d \
 
 kubectl create namespace baremetal-operator-system
 
+kubectl apply -k "${REPO_ROOT}/Metal3/metallb"
 clusterctl init --infrastructure=metal3
 kubectl apply -k "${REPO_ROOT}/Metal3/ironic"
 kubectl apply -k "${REPO_ROOT}/Metal3/bmo"
+kubectl -n metallb-system apply -f "${REPO_ROOT}/Metal3/metallb/IPAddressPool.yaml"
+kubectl -n metallb-system apply -f "${REPO_ROOT}/Metal3/metallb/L2advertisment.yaml"
