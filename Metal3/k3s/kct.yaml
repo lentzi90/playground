@@ -1,0 +1,18 @@
+apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+kind: KThreesConfigTemplate
+metadata:
+  name: k3s-1-workers
+  namespace: default
+spec:
+  template:
+    spec:
+      agentConfig:
+        nodeName: '{{ ds.meta_data.name }}'
+        nodeLabels:
+        - 'metal3.io/uuid={{ ds.meta_data.uuid }}'
+        kubeletArgs:
+        - 'provider-id=metal3://{{ ds.meta_data.providerid }}'
+      preK3sCommands:
+      - mkdir -p /home/ubuntu/.ssh
+      - echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF3XsjgwkAkxd5aioPiBws7O5nx5ofcR4TvAIOvSQ9Ce lennart" > /home/ubuntu/.ssh/authorized_keys
+      version: v1.28.5+k3s1

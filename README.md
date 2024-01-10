@@ -120,3 +120,25 @@ Add CNI to make nodes healthy:
 clusterctl get kubeconfig test-1 > kubeconfig.yaml
 kubectl --kubeconfig=kubeconfig.yaml apply -k Metal3/cni
 ```
+
+### K3s as bootstrap and control-plane provider
+
+Add the following to `${HOME}/.cluster-api/clusterctl.yaml`:
+
+```yaml
+providers:
+- name: "k3s"
+  url: https://github.com/cluster-api-provider-k3s/cluster-api-k3s/releases/latest/bootstrap-components.yaml
+  type: "BootstrapProvider"
+- name: "k3s"
+  url: https://github.com/cluster-api-provider-k3s/cluster-api-k3s/releases/latest/control-plane-components.yaml
+  type: "ControlPlaneProvider"
+```
+
+Then initialize the k3s providers and create a cluster
+
+```bash
+clusterctl init --bootstrap k3s --control-plane k3s
+# Wait for them to be ready, then continue
+kubectl apply -k Metal3/k3s
+```

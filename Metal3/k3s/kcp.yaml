@@ -1,0 +1,30 @@
+apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+kind: KThreesControlPlane
+metadata:
+  name: k3s-1
+  namespace: default
+spec:
+  infrastructureTemplate:
+    apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+    kind: Metal3MachineTemplate
+    name: k3s-1-controlplane-v1-28-4
+    namespace: default
+  replicas: 1
+  version: v1.28.5+k3s1
+  kthreesConfigSpec:
+    serverConfig:
+      disableExternalCloudProvider: true
+      disableComponents:
+      - traefik
+      - servicelb
+      - metrics-server
+      - local-storage
+    agentConfig:
+      nodeName: '{{ ds.meta_data.name }}'
+      nodeLabels:
+      - 'metal3.io/uuid={{ ds.meta_data.uuid }}'
+      kubeletArgs:
+      - 'provider-id=metal3://{{ ds.meta_data.providerid }}'
+    preK3sCommands:
+    - mkdir -p /home/ubuntu/.ssh
+    - echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF3XsjgwkAkxd5aioPiBws7O5nx5ofcR4TvAIOvSQ9Ce lennart" > /home/ubuntu/.ssh/authorized_keys
