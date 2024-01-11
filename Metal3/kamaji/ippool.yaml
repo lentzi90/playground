@@ -1,0 +1,13 @@
+apiVersion: ipam.metal3.io/v1alpha1
+kind: IPPool
+metadata:
+  name: netpool-ipv4-kamaji-1
+  namespace: default
+spec:
+  clusterName: kamaji-1
+  gateway: 10.0.62.1
+  namePrefix: netpool-ipv4
+  pools:
+  - end: 10.0.62.101
+    prefix: 24
+    start: 10.0.62.2

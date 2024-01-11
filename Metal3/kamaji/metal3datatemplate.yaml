@@ -1,0 +1,34 @@
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: Metal3DataTemplate
+metadata:
+  name: kamaji-1-workers-template
+  namespace: default
+spec:
+  clusterName: kamaji-1
+  metaData:
+    gatewaysFromIPPool:
+    - apiGroup: ipam.metal3.io
+      key: Gateway_For_Net_ipv4
+      kind: IPPool
+      name: netpool-ipv4-kamaji-1
+    indexes:
+    - key: machine_index
+      step: 1
+    ipAddressesFromIPPool:
+    - apiGroup: ipam.metal3.io
+      key: IP_For_Net_ipv4
+      kind: IPPool
+      name: netpool-ipv4-kamaji-1
+    objectNames:
+    - key: machine_name
+      object: machine
+    - key: metal3machine_name
+      object: metal3machine
+    - key: bmh_name
+      object: baremetalhost
+    prefixesFromIPPool:
+    - apiGroup: ipam.metal3.io
+      key: Prefix_For_Net_ipv4
+      kind: IPPool
+      name: netpool-ipv4-kamaji-1
+  templateReference: kamaji-1-workers
