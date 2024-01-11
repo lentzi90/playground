@@ -1,7 +1,7 @@
 apiVersion: cluster.x-k8s.io/v1beta1
 kind: MachineDeployment
 metadata:
-  name: md-1
+  name: md-k3s-1
   namespace: default
   labels:
     cluster.x-k8s.io/cluster-name: k3s-1

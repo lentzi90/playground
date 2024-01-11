@@ -9,7 +9,7 @@ spec:
     spec:
       hostSelector:
         matchLabels:
-          bmh-name: bmo-e2e-0
+          bmh-name: bmo-e2e-4
       automatedCleaningMode: metadata
       dataTemplate:
         name: k3s-1-controlplane-template
@@ -48,7 +48,7 @@ spec:
     spec:
       hostSelector:
         matchLabels:
-          bmh-name: bmo-e2e-0
+          bmh-name: bmo-e2e-4
       automatedCleaningMode: metadata
       dataTemplate:
         name: k3s-1-controlplane-template

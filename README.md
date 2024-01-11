@@ -142,3 +142,15 @@ clusterctl init --bootstrap k3s --control-plane k3s
 # Wait for them to be ready, then continue
 kubectl apply -k Metal3/k3s
 ```
+
+### Kamaji as control-plane provider
+
+```bash
+clusterctl init --control-plane kamaji
+# Install metallb
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.12/config/manifests/metallb-native.yaml
+# Create an IPAddressPool and L2Advertisement
+kubectl apply -k Metal3/metallb
+# Wait for them to be ready, then continue
+kubectl apply -k Metal3/kamaji
+```

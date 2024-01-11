@@ -10,7 +10,7 @@ spec:
     - apiGroup: ipam.metal3.io
       key: Gateway_For_Net_ipv4
       kind: IPPool
-      name: control-plane-endpoint
+      name: control-plane-endpoint-k3s-1
     indexes:
     - key: machine_index
       step: 1
@@ -18,7 +18,7 @@ spec:
     - apiGroup: ipam.metal3.io
       key: IP_For_Net_ipv4
       kind: IPPool
-      name: control-plane-endpoint
+      name: control-plane-endpoint-k3s-1
     objectNames:
     - key: machine_name
       object: machine
@@ -30,7 +30,7 @@ spec:
     - apiGroup: ipam.metal3.io
       key: Prefix_For_Net_ipv4
       kind: IPPool
-      name: control-plane-endpoint
+      name: control-plane-endpoint-k3s-1
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: Metal3DataTemplate
@@ -44,7 +44,7 @@ spec:
     - apiGroup: ipam.metal3.io
       key: Gateway_For_Net_ipv4
       kind: IPPool
-      name: netpool-ipv4
+      name: netpool-ipv4-k3s-1
     indexes:
     - key: machine_index
       step: 1
@@ -52,7 +52,7 @@ spec:
     - apiGroup: ipam.metal3.io
       key: IP_For_Net_ipv4
       kind: IPPool
-      name: netpool-ipv4
+      name: netpool-ipv4-k3s-1
     objectNames:
     - key: machine_name
       object: machine
@@ -64,5 +64,5 @@ spec:
     - apiGroup: ipam.metal3.io
       key: Prefix_For_Net_ipv4
       kind: IPPool
-      name: netpool-ipv4
+      name: netpool-ipv4-k3s-1
   templateReference: k3s-1-workers
