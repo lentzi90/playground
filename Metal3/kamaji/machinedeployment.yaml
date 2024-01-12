@@ -26,7 +26,7 @@ spec:
     spec:
       nodeDrainTimeout: "0s"
       clusterName: kamaji-1
-      version: v1.28.5+k3s1
+      version: v1.28.1
       bootstrap:
         configRef:
           name: kamaji-1-workers
