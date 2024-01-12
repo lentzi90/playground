@@ -14,6 +14,8 @@ Metal3/images
 
 ironic-auth-config
 ironic-inspector-auth-config
+ironic-auth-config-tpl
+ironic-inspector-auth-config-tpl
 ironic-htpasswd
 ironic-inspector-htpasswd
 ironic-password
