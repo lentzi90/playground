@@ -164,3 +164,12 @@ kustomize build --enable-helm capi-visualizer | kubectl apply -f -
 kubectl -n observability port-forward svc/capi-visualizer 8081
 ```
 Then go to <http://localhost:8081/>.
+
+## Kube-prometheus
+
+Deploy the kube-prometheus example manifests.
+
+```bash
+kubectl apply -k kube-prometheus/setup
+kubectl apply -k kube-prometheus
+```
