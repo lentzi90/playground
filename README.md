@@ -154,3 +154,13 @@ kubectl apply -k Metal3/metallb
 # Wait for them to be ready, then continue
 kubectl apply -k Metal3/kamaji
 ```
+
+## CAPI visualizer
+
+Visualize the clusters and related objects.
+
+```bash
+kustomize build --enable-helm capi-visualizer | kubectl apply -f -
+kubectl -n observability port-forward svc/capi-visualizer 8081
+```
+Then go to <http://localhost:8081/>.
