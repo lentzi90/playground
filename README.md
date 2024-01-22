@@ -151,6 +151,10 @@ clusterctl init --control-plane kamaji
 kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.12/config/manifests/metallb-native.yaml
 # Create an IPAddressPool and L2Advertisement
 kubectl apply -k Metal3/metallb
+# Install kamaji
+helm repo add clastix https://clastix.github.io/charts
+helm repo update
+helm install kamaji clastix/kamaji -n kamaji-system --create-namespace
 # Wait for them to be ready, then continue
 kubectl apply -k Metal3/kamaji
 ```
