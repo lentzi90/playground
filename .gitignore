@@ -11,6 +11,7 @@ capi-visualizer/charts
 output.yaml
 
 .venv
+vendor
 
 Metal3/images
 
