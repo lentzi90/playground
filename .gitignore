@@ -1,6 +1,7 @@
 clouds.yaml
 cloud.conf
-kubeconfig.yaml
+cloud-config-secret.yaml
+*kubeconfig.yaml
 .s3cfg
 s3-credentials.json
 service-account.json
@@ -22,3 +23,6 @@ ironic-password
 ironic-username
 ironic-inspector-password
 ironic-inspector-username
+
+ClusterResourceSets/calico.yaml
+ClusterResourceSets/cloud-provider-openstack.yaml

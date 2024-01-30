@@ -6,7 +6,7 @@ metadata:
 spec:
   template:
     spec:
-      cloudName: lennart-test-kna1
+      cloudName: lennart-test-fra1
       flavor: 4C-4GB-100GB
       identityRef:
         kind: Secret
@@ -21,7 +21,7 @@ metadata:
 spec:
   template:
     spec:
-      cloudName: lennart-test-kna1
+      cloudName: lennart-test-fra1
       flavor: 4C-4GB-100GB
       identityRef:
         kind: Secret

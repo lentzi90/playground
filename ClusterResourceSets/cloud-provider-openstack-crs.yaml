@@ -1,0 +1,16 @@
+---
+apiVersion: addons.cluster.x-k8s.io/v1beta1
+kind: ClusterResourceSet
+metadata:
+  name: cloud-provider-openstack
+  namespace: default
+spec:
+  strategy: "Reconcile"
+  clusterSelector:
+    matchLabels:
+      cloud: openstack
+  resources:
+    - name: cloud-provider-openstack
+      kind: ConfigMap
+    - name: cloud-config
+      kind: Secret
