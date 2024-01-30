@@ -10,7 +10,7 @@ spec:
         allowedCidrs:
         - 10.6.0.0/24
         - 91.150.31.32/32
-      cloudName: lennart-test-kna1
+      cloudName: lennart-test-fra1
       dnsNameservers:
       - 8.8.8.8
       externalNetworkId: fba95253-5543-4078-b793-e2de58c31378
@@ -22,7 +22,7 @@ spec:
       bastion:
         enabled: true
         instance:
-          cloudName: lennart-test-kna1
+          cloudName: lennart-test-fra1
           flavor: 1C-2GB-50GB
           image: "Ubuntu 22.04 Jammy Jellyfish x86_64"
           sshKeyName: lennart-ed25519

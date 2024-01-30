@@ -8,7 +8,7 @@ spec:
     allowedCidrs:
     - 10.6.0.0/24
     - 91.150.31.32/32
-  cloudName: lennart-test
+  cloudName: lennart-test-fra1
   dnsNameservers:
   - 8.8.8.8
   externalNetworkId: fba95253-5543-4078-b793-e2de58c31378
