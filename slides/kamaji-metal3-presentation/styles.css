@@ -1,0 +1,41 @@
+body {
+	text-align: center;
+	line-height: 1.5 !important; 
+}
+
+.reveal .slide-background.l-cover:before {
+	background: rgba(0, 0, 0, 0) !important;
+}
+
+#logos p {
+	display: flex;
+}
+#logos p img {
+	margin: 50px;
+	position: relative;
+	width: 10vw;
+}
+.left {
+	margin: 10px 0 15px 0;
+	text-align: left;
+	float: left;
+	z-index:-10;
+	width:48%;
+}
+
+.right {
+	line-height: 2.5;
+	margin: 10px 0 15px 0;
+	float: right;
+	text-align: left;
+	z-index:-10;
+	width:48%;
+}
+
+.right ul {
+	line-height: 1.5; 
+}
+
+li a {
+	list-style-type: none;
+}
