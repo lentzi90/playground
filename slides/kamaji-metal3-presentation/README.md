@@ -1,5 +1,5 @@
 ---
-title: Baremetal k8s provision with Metal3 using Kamaji CP provider
+title: Baremetal k8s provision with Metal3 using Kamaji Control Plane provider
 # theme: https://rawgit.com/puzzle/pitc-revealjs-theme/master/theme/puzzle.css
 theme: simple
 css: styles.css
@@ -9,7 +9,7 @@ revealOptions:
     breaks: true
 ---
 <!-- .slide: class="l-cover" -->
-# Baremetal k8s provision with Metal3 using Kamaji CP provider
+# Baremetal k8s provision with Metal3 using Kamaji Control Plane provider
 
 <div id="logos">
 
@@ -44,7 +44,7 @@ Ironic is the entity doing the low-level management of the baremetal nodes
 ---
 ## About Kamaji
 <!-- .slide: data-background-color="#00E0C1" -->
-Kamaji is a Kubernetes Control Plane Manager. It manages K8s CP as "Tenant Control Plane" pods.
+Kamaji is a Kubernetes Control Plane (CP) Manager. It manages K8s CP as "Tenant Control Plane" pods.
 <!-- .element: class="fragment" -->
 https://kamaji.clastix.io/
 <!-- .element: class="fragment" -->
