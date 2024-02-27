@@ -199,5 +199,10 @@ spec:
   noCloudProvider: true
 ```
 ---
-# Demo
-[![asciicast](https://asciinema.org/a/643257.svg)](https://asciinema.org/a/643257)
+# Demo: Provision Metal3 baremetal clusters with Kamaji control planes
+---
+<iframe data-src="https://asciinema.org/a/643322/iframe?" id="asciicast-iframe-643322" name="asciicast-iframe-gJMGgx3h2YCYBl1tjpTGRX3Cq" scrolling="yes" allowfullscreen="true" style="overflow: hidden; margin: 0px; border: 0px; display: inline-block; width: 100%; float: none; visibility: visible; height: 1200px;"></iframe>
+---
+# Demo: Karmada management on Metal3+Kamaji-provisioned clusters
+---
+<iframe data-src="https://asciinema.org/a/643323/iframe?" id="asciicast-iframe-643323" name="asciicast-iframe-gJMGgx3h2YCYBl1tjpTGRX3Cq" scrolling="yes" allowfullscreen="true" style="overflow: hidden; margin: 0px; border: 0px; display: inline-block; width: 100%; float: none; visibility: visible; height: 1200px;"></iframe>
