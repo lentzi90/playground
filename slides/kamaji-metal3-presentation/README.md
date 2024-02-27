@@ -1,7 +1,6 @@
 ---
 title: Baremetal k8s provision with Metal3 using Kamaji Control Plane provider
-# theme: https://rawgit.com/puzzle/pitc-revealjs-theme/master/theme/puzzle.css
-theme: simple
+theme: https://rawgit.com/puzzle/pitc-revealjs-theme/master/theme/puzzle.css
 css: styles.css
 revealOptions:
   transition: slide
@@ -31,6 +30,7 @@ revealOptions:
 <!-- .element: class="fragment" -->
 - In a typical Metal3-provisioned cluster, both CP and worker nodes are baremetal 
 <!-- .element: class="fragment" -->
+
 https://metal3.io 
 <!-- .element: class="fragment" -->
 </div>
@@ -43,18 +43,18 @@ Note: Here is an image of Metal3's main components. We have one Cluster API infr
 Ironic is the entity doing the low-level management of the baremetal nodes
 ---
 ## About Kamaji
-<!-- .slide: data-background-color="#00E0C1" -->
+<!-- .slide: data-background-color="#224472" -->
 Kamaji is a Kubernetes Control Plane (CP) Manager. It manages K8s CP as "Tenant Control Plane" pods.
 <!-- .element: class="fragment" -->
 https://kamaji.clastix.io/
 <!-- .element: class="fragment" -->
 ---
 ## About Kamaji
-<!-- .slide: data-background-color="#00E0C1" -->
+<!-- .slide: data-background-color="#224472" -->
 ![](images/kamaji_character.png)
 ---
 ## About Kamaji
-<!-- .slide: data-background-color="#00E0C1" -->
+<!-- .slide: data-background-color="#224472" -->
 ![](images/kamaji_layout.png)
 ---
 <!-- .slide: class="l-cover" -->
@@ -156,7 +156,7 @@ Note: This is a diagram taken from documentation of Karmada, currently one of th
 ---
 ## Metal3 with Kamaji Setup
 - Only provision worker node with Metal3
-- Use [metallb](https://metallb.org/) as a load-balancer to provide ip to Kamaji CP.
+- Use `metallb` as a load-balancer to provide ip to Kamaji CP.
 - Provide the same IP to `Metal3Cluster`.
 Note: The exact setup did, of course, require some investigation, but in the end it was pretty straight-forward.
 In a typical Metal3 cluster provision, Metal3 has its own ip provider that handles the ip allocation. That ipam doesn't work with kamaji, unfortunately, as kamaji expects a loadBalancer.
@@ -200,4 +200,4 @@ spec:
 ```
 ---
 # Demo
-[![asciicast](https://asciinema.org/a/wMwruiThf7ozuw4Whqc6z6F1R.svg)](https://asciinema.org/a/wMwruiThf7ozuw4Whqc6z6F1R)
+[![asciicast](https://asciinema.org/a/643257.svg)](https://asciinema.org/a/643257)
