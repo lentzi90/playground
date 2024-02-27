@@ -113,47 +113,6 @@ Centralized management <span> &#x2717; </span> <!-- .element: class="fragment fa
 Application Resiliency <span> &#x2714; </span> <!-- .element: class="fragment fade-in" -->
 Note: So the "morale" of this example is to show you that there are certain situations in which having multiple clusters is desired. But managing application level LC on many clusters at once might be a big challenge.
 ---
-## Multi-Cluster Management (MCM)
-- MCM is the idea of having multiple clusters managed centrally from one management cluster.
-<!-- .element: class="fragment" -->
-- There is a sig-group called Multi-cluster sigs, which standardize and co-ordinate different practices around multi-cluster
-<!-- .element: class="fragment" -->
-- There are at least a dozen of opensourced projects that handle MCM
-<!-- .element: class="fragment" -->
----
-## MCM Push and Pull modes
-![](images/karmada_structure.png)
-<!-- .element: class="fragment" -->
-Note: This is a diagram taken from documentation of Karmada, currently one of the most popular MCM projects. We're about to see Karmada in action in the demo soon, but for now what I'd like to show is the two modes that the management cluster can used to access to a member cluster.
-----
-## MCM Push and Pull modes
-<div class="left">
-
-### Push mode
-#### Pros:
-- Save Resources (on member cluster)
-
-#### Cons:
-- Require stable access to member clusters' API
-</div>
-<div class="right">
-
-### Pull mode
-#### Pros:
-- Allows intermittent connection from manager cluster to member clusters
-
-#### Cons:
-- Consumes more resources
-
-</div>
----
-## MCM Push and Pull modes
-
-- The differences between push mode and pull mode is a trade-off between less resource consumed and more reliable management. 
-<!-- .element: class="fragment" -->
-- Kamaji-hosted CPs allow all CPs in one place, which means we can use push mode instead pull mode
-<!-- .element: class="fragment" -->
----
 ## Metal3 with Kamaji Setup
 - Only provision worker node with Metal3
 - Use `metallb` as a load-balancer to provide ip to Kamaji CP.
@@ -202,6 +161,47 @@ spec:
 # Demo: Provision Metal3 baremetal clusters with Kamaji control planes
 ---
 <iframe data-src="https://asciinema.org/a/643322/iframe?" id="asciicast-iframe-643322" name="asciicast-iframe-gJMGgx3h2YCYBl1tjpTGRX3Cq" scrolling="yes" allowfullscreen="true" style="overflow: hidden; margin: 0px; border: 0px; display: inline-block; width: 100%; float: none; visibility: visible; height: 1200px;"></iframe>
+---
+## Multi-Cluster Management (MCM)
+- MCM is the idea of having multiple clusters managed centrally from one management cluster.
+<!-- .element: class="fragment" -->
+- There is a sig-group called Multi-cluster sigs, which standardize and co-ordinate different practices around multi-cluster
+<!-- .element: class="fragment" -->
+- There are at least a dozen of opensourced projects that handle MCM
+<!-- .element: class="fragment" -->
+---
+## MCM Push and Pull modes
+![](images/karmada_structure.png)
+<!-- .element: class="fragment" -->
+Note: This is a diagram taken from documentation of Karmada, currently one of the most popular MCM projects. We're about to see Karmada in action in the demo soon, but for now what I'd like to show is the two modes that the management cluster can used to access to a member cluster.
+----
+## MCM Push and Pull modes
+<div class="left">
+
+### Push mode
+#### Pros:
+- Save Resources (on member cluster)
+
+#### Cons:
+- Require stable access to member clusters' API
+</div>
+<div class="right">
+
+### Pull mode
+#### Pros:
+- Allows intermittent connection from manager cluster to member clusters
+
+#### Cons:
+- Consumes more resources
+
+</div>
+---
+## MCM Push and Pull modes
+
+- The differences between push mode and pull mode is a trade-off between less resource consumed and more reliable management. 
+<!-- .element: class="fragment" -->
+- Kamaji-hosted CPs allow all CPs in one place, which means we can use push mode instead pull mode
+<!-- .element: class="fragment" -->
 ---
 # Demo: Karmada management on Metal3+Kamaji-provisioned clusters
 ---
