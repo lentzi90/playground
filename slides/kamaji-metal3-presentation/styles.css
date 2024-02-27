@@ -46,3 +46,8 @@ section a {
 li a {
 	list-style-type: none;
 }
+
+img {
+	margin-top: 5px !important;
+	max-height: 40vh !important;
+}
