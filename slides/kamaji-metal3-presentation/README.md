@@ -1,5 +1,5 @@
 ---
-title: Baremetal k8s provision with Metal3 using Kamaji Control Plane provider
+title: Scale Baremetal operations with Kamaji, Metal3 and Karmada
 theme: https://rawgit.com/puzzle/pitc-revealjs-theme/master/theme/puzzle.css
 css: styles.css
 revealOptions:
@@ -8,7 +8,7 @@ revealOptions:
     breaks: true
 ---
 <!-- .slide: class="l-cover" -->
-# Baremetal k8s provision with Metal3 using Kamaji Control Plane provider
+# Scale Baremetal Operations with Kamaji, Metal3 and Karmada
 
 <div id="logos">
 
@@ -80,7 +80,8 @@ Note: Kamaji also provides other fine-tuning features that make resource saving 
 <!-- .slide: class="l-cover" -->
 # But doesn't having many clusters make management harder?
 #### Should we just have bigger clusters with real CP machines?
-Note: This is totally a valid concern, since managing multiple clusters is difficult. CAPI allows you to provision and manage the clusters life cycles from a central management cluser, but it does not help application level LCM on the member clusters. So, if having big, normal cluster with multiple workers works for you, then it's great. However, let's consider an example usecase.
+Note: This is totally a valid concern, since managing multiple clusters is difficult. CAPI allows you to provision and manage the clusters life cycles from a central management cluser, but it has only limited application level LCM on the member clusters. So, if having big, normal cluster with multiple workers works for you, then it's great. However, let's consider an example usecase.
+A big reason for having multiple clusters is also multi-tenancy. Sharing one big cluster will always be less safe and have more drawbacks compared to having your own cluster.
 ---
 # Problem
 - Multiple Baremetal hosts
@@ -106,6 +107,7 @@ _Application resiliency includes the worker node's ability to continue its assig
 Centralized management <span> &#x2714; </span> <!-- .element: class="fragment fade-in" -->
 Application Resiliency <span> &#x2717; </span> <!-- .element: class="fragment fade-in" -->
 Note: By default, Kubernetes has a healing mechanism to set all of a worker node's pods to "Deletion" once that worker node is not accessible, and reassign those pods to other worker nodes. When the connection to the lost worker is reestablished, all of those pods will be killed. This behavior is sometimes not desired, especially in edge networks scenarios.
+Lennart: I would be careful saying this is a default Kubernetes mechanism. It depends on how the workload is deployed, e.g. Deployment vs StatefulSet vs DaemonSet.
 ---
 ## Remote clusters
 
