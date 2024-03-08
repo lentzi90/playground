@@ -14,6 +14,7 @@ output.yaml
 .venv
 
 Metal3/images
+disk-images
 
 ironic-auth-config
 ironic-inspector-auth-config

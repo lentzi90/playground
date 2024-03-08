@@ -1,0 +1,11 @@
+<network>
+  <name>baremetal</name>
+  <forward mode='nat'>
+    <nat>
+      <port start='1024' end='65535'/>
+    </nat>
+  </forward>
+  <bridge name='metal3'/>
+  <ip address='192.168.222.1' netmask='255.255.255.0'>
+  </ip>
+</network>
