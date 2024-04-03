@@ -136,3 +136,28 @@ Scale cluster:
 ```bash
 kubectl scale md my-cluster --replicas 2
 ```
+
+## Cleanup
+
+```bash
+kubectl delete cluster --all
+kubectl delete bmh --all
+
+kind delete cluster
+
+docker rm -f dnsmasq
+docker rm -f image-server
+docker rm -f sushy-tools
+
+virsh -c qemu:///system destroy --domain bmh-vm-01
+virsh -c qemu:///system undefine --domain bmh-vm-01 --remove-all-storage
+virsh -c qemu:///system destroy --domain bmh-vm-02
+virsh -c qemu:///system undefine --domain bmh-vm-02 --remove-all-storage
+virsh -c qemu:///system destroy --domain bmh-vm-03
+virsh -c qemu:///system undefine --domain bmh-vm-03 --remove-all-storage
+virsh -c qemu:///system destroy --domain bmh-vm-04
+virsh -c qemu:///system undefine --domain bmh-vm-04 --remove-all-storage
+
+virsh -c qemu:///system net-destroy baremetal
+virsh -c qemu:///system net-undefine baremetal
+```
