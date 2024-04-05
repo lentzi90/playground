@@ -25,8 +25,8 @@ spec:
         name: '{{ local_hostname }}'
   machineTemplate:
     infrastructureRef:
-      apiVersion: infrastructure.cluster.x-k8s.io/v1alpha7
+      apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
       kind: OpenStackMachineTemplate
-      name: lennart-test-control-plane-v1-27-10
+      name: lennart-test-control-plane-v1-28-6
   replicas: 1
-  version: v1.27.10
+  version: v1.28.6

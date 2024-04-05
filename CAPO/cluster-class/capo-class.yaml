@@ -12,12 +12,12 @@ spec:
     machineInfrastructure:
       ref:
         kind: OpenStackMachineTemplate
-        apiVersion: infrastructure.cluster.x-k8s.io/v1alpha7
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
         name: lennart-openstack-v0.1.0
         namespace: default
   infrastructure:
     ref:
-      apiVersion: infrastructure.cluster.x-k8s.io/v1alpha7
+      apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
       kind: OpenStackClusterTemplate
       name: lennart-openstack-v0.1.0
       namespace: default
@@ -33,7 +33,7 @@ spec:
             namespace: default
         infrastructure:
           ref:
-            apiVersion: infrastructure.cluster.x-k8s.io/v1alpha7
+            apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
             kind: OpenStackMachineTemplate
             name: lennart-openstack-v0.1.0-default-worker
             namespace: default
@@ -42,13 +42,13 @@ spec:
     description: "Sets the OpenStack image that is used for creating the servers."
     definitions:
     - selector:
-        apiVersion: infrastructure.cluster.x-k8s.io/v1alpha7
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
         kind: OpenStackMachineTemplate
         matchResources:
           controlPlane: true
       jsonPatches:
       - op: add
-        path: /spec/template/spec/image
+        path: /spec/template/spec/image/filter/name
         valueFrom:
           template: |
             ubuntu-2204-kube-{{ .builtin.controlPlane.version }}
@@ -56,7 +56,7 @@ spec:
     description: "Sets the OpenStack image that is used for creating the servers."
     definitions:
     - selector:
-        apiVersion: infrastructure.cluster.x-k8s.io/v1alpha7
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
         kind: OpenStackMachineTemplate
         matchResources:
           machineDeploymentClass:
@@ -64,7 +64,7 @@ spec:
             - default-worker
       jsonPatches:
       - op: add
-        path: /spec/template/spec/image
+        path: /spec/template/spec/image/filter/name
         valueFrom:
           template: |
             ubuntu-2204-kube-{{ .builtin.machineDeployment.version }}
