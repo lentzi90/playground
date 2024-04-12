@@ -3,14 +3,14 @@ kind: Kustomization
 namespace: baremetal-operator-system
 # These are the kustomizations we build on. You can download them and change the URLs to relative
 # paths if you do not want to access them over the network.
-# Note that the ref=v0.5.0 specifies the version to use.
+# Note that the ref=v0.5.1 specifies the version to use.
 resources:
-  - https://github.com/metal3-io/baremetal-operator/config/namespace?ref=v0.5.0
-  - https://github.com/metal3-io/baremetal-operator/ironic-deployment/base?ref=v0.5.0
+  - https://github.com/metal3-io/baremetal-operator/config/namespace?ref=v0.5.1
+  - https://github.com/metal3-io/baremetal-operator/ironic-deployment/base?ref=v0.5.1
 # The kustomize components configure basic-auth and TLS
 components:
-  - https://github.com/metal3-io/baremetal-operator/ironic-deployment/components/basic-auth?ref=v0.5.0
-  - https://github.com/metal3-io/baremetal-operator/ironic-deployment/components/tls?ref=v0.5.0
+  - https://github.com/metal3-io/baremetal-operator/ironic-deployment/components/basic-auth?ref=v0.5.1
+  - https://github.com/metal3-io/baremetal-operator/ironic-deployment/components/tls?ref=v0.5.1
 
 # Create a ConfigMap from ironic_bmo.env and call it ironic-bmo-configmap.
 # This ConfigMap will be used to set environment variables for the containers.
@@ -19,6 +19,10 @@ configMapGenerator:
       - ironic_bmo.env
     name: ironic-bmo-configmap
     behavior: create
+
+images:
+- name: quay.io/metal3-io/ironic
+  newTag: v24.0.0
 
 patches:
   # Patch for removing dnsmasq
@@ -34,7 +38,7 @@ patches:
         value: 192.168.222.1
       - op: add
         path: /spec/ipAddresses/-
-        value: 172.18.0.3
+        value: 172.18.0.2
     target:
       kind: Certificate
       name: ironic-cert|ironic-inspector-cert

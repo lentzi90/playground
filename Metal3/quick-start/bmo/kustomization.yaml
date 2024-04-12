@@ -5,13 +5,17 @@ namespace: baremetal-operator-system
 # the URL to a relative path if you do not want to access it over the network.
 # Note that the ref=v0.5.0 specifies the version to use.
 resources:
-  - https://github.com/metal3-io/baremetal-operator/config/overlays/basic-auth_tls?ref=v0.5.0
+  - https://github.com/metal3-io/baremetal-operator/config/overlays/basic-auth_tls?ref=v0.5.1
 # Create a ConfigMap from ironic.env and name it ironic.
 configMapGenerator:
   - name: ironic
     behavior: create
     envs:
       - ironic.env
+
+images:
+- name: quay.io/metal3-io/baremetal-operator
+  newTag: v0.5.1
 
 # We cannot use suffix hashes since the kustomizations we build on
 # cannot be aware of what suffixes we add.

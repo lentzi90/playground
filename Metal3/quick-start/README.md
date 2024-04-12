@@ -5,6 +5,9 @@ Based on <https://book.metal3.io/quick-start>
 Set up environment:
 
 ```bash
+virsh -c qemu:///system net-define net.xml
+virsh -c qemu:///system net-start baremetal
+
 kind create cluster --config kind.yaml
 kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.3/cert-manager.yaml
 
@@ -24,9 +27,6 @@ kubectl get node -o wide
 # Edit IP as needed in ironic/kustomization.yaml
 kubectl apply -k ironic
 kubectl apply -k bmo
-
-virsh -c qemu:///system net-define net.xml
-virsh -c qemu:///system net-start baremetal
 
 virt-install \
   --connect qemu:///system \
@@ -156,7 +156,7 @@ virsh -c qemu:///system undefine --domain bmh-vm-02 --remove-all-storage
 virsh -c qemu:///system destroy --domain bmh-vm-03
 virsh -c qemu:///system undefine --domain bmh-vm-03 --remove-all-storage
 virsh -c qemu:///system destroy --domain bmh-vm-04
-virsh -c qemu:///system undefine --domain bmh-vm-04 --remove-all-storage
+virsh -c qemu:///system undefine --domain bmh-vm-04 --remove-all-storage --nvram
 
 virsh -c qemu:///system net-destroy baremetal
 virsh -c qemu:///system net-undefine baremetal
