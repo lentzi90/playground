@@ -9,6 +9,7 @@ generatorOptions:
 secretGenerator:
 - files:
   - cloud.conf
+  - clouds.yaml
   name: cloud-config
   namespace: kube-system
   type: Opaque

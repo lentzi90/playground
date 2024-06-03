@@ -22,7 +22,9 @@ Save the Calico manifest, OpenStack cloud provider and cloud-config secret to be
 ```bash
 kustomize build CAPO/cluster-resources/calico > ClusterResourceSets/calico.yaml
 kustomize build CAPO/cluster-resources/cloud-provider-openstack > ClusterResourceSets/cloud-provider-openstack.yaml
-kubectl -n kube-system create secret generic cloud-config --from-file=cloud.conf=CAPO/cluster-resources/cloud.conf \
+kubectl -n kube-system create secret generic cloud-config \
+  --from-file=clouds.yaml=CAPO/cluster-resources/clouds.yaml \
+  --from-file=cloud.conf=CAPO/cluster-resources/cloud.conf \
   --dry-run=client -o yaml > ClusterResourceSets/cloud-config-secret.yaml
 ```
 
@@ -57,15 +59,14 @@ kubectl apply -k CAPO/test-cluster
 
 ### CNI and external cloud provider
 
-Create cluster-resources/cloud.conf file to be used by the external cloud provider.
+Create cluster-resources/clouds.yaml (it can be the same as the above) file and cluster-resources/cloud.conf file to be used by the external cloud provider and then apply the cluster-resources:
 
 ```ini
+# cluster-resources/cloud.conf
 [Global]
-auth-url=TODO
-application-credential-id=TODO
-application-credential-secret=TODO
-region=TODO
-domain-name=TODO
+use-clouds=true
+cloud=TODO
+clouds-file=/etc/config/clouds.yaml
 ```
 
 ```bash
