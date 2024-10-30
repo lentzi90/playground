@@ -82,7 +82,7 @@ kind create cluster
 export CLUSTER_TOPOLOGY=true
 clusterctl init --infrastructure=in-memory
 kubectl apply -f https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.5.1/clusterclass-in-memory-quick-start.yaml
-clusterctl generate cluster in-memory-test --flavor=in-memory-development --kubernetes-version=v1.28.1 > in-memory-cluster.yaml
+clusterctl generate cluster in-memory-test --flavor=in-memory-development --kubernetes-version=v1.31.1 > in-memory-cluster.yaml
 
 # Create a single cluster
 kubectl apply -f in-memory-cluster.yaml
@@ -104,29 +104,29 @@ Create a file with variables:
 
 ```json
 {
-  "iso_checksum": "a4acfda10b18da50e2ec50ccaf860d7f20b389df8765611142305c0e911d16fd",
+  "iso_checksum": "e240e4b801f7bb68c20d1356b60968ad0c33a41d00d828e74ceb3364a0317be9",
   "iso_checksum_type": "sha256",
-  "iso_url": "https://releases.ubuntu.com/jammy/ubuntu-22.04.3-live-server-amd64.iso",
-  "kubernetes_deb_version": "1.28.4-1.1",
-  "kubernetes_rpm_version": "1.28.4",
-  "kubernetes_semver": "v1.28.4",
-  "kubernetes_series": "v1.28"
+  "iso_url": "https://releases.ubuntu.com/noble/ubuntu-24.04.1-live-server-amd64.iso",
+  "kubernetes_deb_version": "1.31.1-1.1",
+  "kubernetes_rpm_version": "1.31.1",
+  "kubernetes_semver": "v1.31.1",
+  "kubernetes_series": "v1.31"
 }
 ```
 
 Build the image:
 
 ```bash
-PACKER_VAR_FILES=qemu_vars.json make build-qemu-ubuntu-2204
+PACKER_VAR_FILES=qemu_vars.json make build-qemu-ubuntu-2404
 ```
 
 Convert the image to raw format (otherwise each BMH needs enough memory to load the whole image in order to convert it).
 
 ```bash
-qemu-img convert -f qcow2 -O raw output/ubuntu-2204-kube-v1.28.4/ubuntu-2204-kube-v1.28.4 \
-  output/ubuntu-2204-kube-v1.28.4/ubuntu-2204-kube-v1.28.4.raw
+qemu-img convert -f qcow2 -O raw output/ubuntu-2404-kube-v1.31.1/ubuntu-2404-kube-v1.31.1 \
+  output/ubuntu-2404-kube-v1.31.1/ubuntu-2404-kube-v1.31.1.raw
 # Calculate the checksum
-sha256 output/ubuntu-2204-kube-v1.28.4/ubuntu-2204-kube-v1.28.4.raw
+sha256 output/ubuntu-2404-kube-v1.31.1/ubuntu-2404-kube-v1.31.1.raw
 ```
 
 ## Metal3
@@ -200,6 +200,6 @@ Then go to <http://localhost:8081/>.
 Deploy the kube-prometheus example manifests.
 
 ```bash
-kubectl apply -k kube-prometheus/setup
+kubectl apply --server-side=true -k kube-prometheus/setup
 kubectl apply -k kube-prometheus
 ```
