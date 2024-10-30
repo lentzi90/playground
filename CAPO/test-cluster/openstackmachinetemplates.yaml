@@ -1,66 +1,4 @@
 ---
-apiVersion: infrastructure.cluster.x-k8s.io/v1alpha7
-kind: OpenStackMachineTemplate
-metadata:
-  name: lennart-test-control-plane-v1-27-10
-spec:
-  template:
-    spec:
-      cloudName: lennart-test-fra1
-      flavor: 4C-4GB-100GB
-      identityRef:
-        kind: Secret
-        name: lennart-test-cloud-config
-      image: ubuntu-2204-kube-v1.27.10
-      sshKeyName: lennart-ed25519
----
-apiVersion: infrastructure.cluster.x-k8s.io/v1alpha7
-kind: OpenStackMachineTemplate
-metadata:
-  name: lennart-test-md-0-v1-27-10
-spec:
-  template:
-    spec:
-      cloudName: lennart-test-fra1
-      flavor: 4C-4GB-100GB
-      identityRef:
-        kind: Secret
-        name: lennart-test-cloud-config
-      image: ubuntu-2204-kube-v1.27.10
-      sshKeyName: lennart-ed25519
----
-apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
-kind: OpenStackMachineTemplate
-metadata:
-  name: lennart-test-control-plane-v1-28-6
-spec:
-  template:
-    spec:
-      flavor: 4C-4GB-100GB
-      identityRef:
-        cloudName: lennart-test-fra1
-        name: lennart-test-cloud-config
-      image:
-        filter:
-          name: ubuntu-2204-kube-v1.28.6
-      sshKeyName: lennart-ed25519
----
-apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
-kind: OpenStackMachineTemplate
-metadata:
-  name: lennart-test-md-0-v1-28-6
-spec:
-  template:
-    spec:
-      flavor: 4C-4GB-100GB
-      identityRef:
-        cloudName: lennart-test-fra1
-        name: lennart-test-cloud-config
-      image:
-        filter:
-          name: ubuntu-2204-kube-v1.28.6
-      sshKeyName: lennart-ed25519
----
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: OpenStackMachineTemplate
 metadata:
@@ -73,8 +11,13 @@ spec:
         cloudName: xerces-capo
         name: lennart-test-cloud-config
       image:
-        filter:
-          name: ubuntu-24.04
+        id: 9cf21bd2-ad5b-4f98-8eaa-36c749c88015
+        # filter:
+        #   name: ubuntu-24.04
       rootVolume:
         sizeGiB: 100
       sshKeyName: lennart-ed25519
+      # ports:
+      #   - network:
+      #       filter:
+      #         name: metal3-ci-net
