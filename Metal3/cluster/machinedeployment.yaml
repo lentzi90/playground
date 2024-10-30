@@ -26,13 +26,13 @@ spec:
     spec:
       nodeDrainTimeout: "0s"
       clusterName: test-1
-      version: v1.30.1
+      version: v1.31.1
       bootstrap:
         configRef:
           name: test-1-workers
           apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
           kind: KubeadmConfigTemplate
       infrastructureRef:
-        name: test-1-workers-v1-30-1
+        name: test-1-workers-v1-31-1
         apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
         kind: Metal3MachineTemplate

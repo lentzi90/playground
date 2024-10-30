@@ -1,7 +1,7 @@
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: Metal3MachineTemplate
 metadata:
-  name: test-1-controlplane-v1-28-2
+  name: test-1-controlplane-v1-31-1
   namespace: default
 spec:
   nodeReuse: false
@@ -14,15 +14,15 @@ spec:
       dataTemplate:
         name: test-1-controlplane-template
       image:
-        checksum: bed6ff0f7cde1edfd07e20aab324e406a9027b5cbf05c93fc10d7a7391ea0343
+        checksum: aab4cbba9707d14c58931f6e9fb75736d5fe3df0f52a4e19c70609e11b5623af
         checksumType: sha256
         format: raw
-        url: http://192.168.222.1/ubuntu-2204-kube-v1.28.2.raw
+        url: http://192.168.222.1/ubuntu-2404-kube-v1.31.1.raw
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: Metal3MachineTemplate
 metadata:
-  name: test-1-workers-v1-28-2
+  name: test-1-workers-v1-31-1
   namespace: default
 spec:
   nodeReuse: false
@@ -32,10 +32,10 @@ spec:
       dataTemplate:
         name: test-1-workers-template
       image:
-        checksum: bed6ff0f7cde1edfd07e20aab324e406a9027b5cbf05c93fc10d7a7391ea0343
+        checksum: aab4cbba9707d14c58931f6e9fb75736d5fe3df0f52a4e19c70609e11b5623af
         checksumType: sha256
         format: raw
-        url: http://192.168.222.1/ubuntu-2204-kube-v1.28.2.raw
+        url: http://192.168.222.1/ubuntu-2404-kube-v1.31.1.raw
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: Metal3MachineTemplate

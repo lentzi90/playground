@@ -8,7 +8,7 @@ spec:
     infrastructureRef:
       apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
       kind: Metal3MachineTemplate
-      name: test-1-controlplane-v1-30-1
+      name: test-1-controlplane-v1-31-1
       namespace: default
     nodeDrainTimeout: "0s"
   replicas: 1
@@ -16,7 +16,7 @@ spec:
     rollingUpdate:
       maxSurge: 1
     type: RollingUpdate
-  version: v1.30.1
+  version: v1.31.1
   kubeadmConfigSpec:
     joinConfiguration:
       controlPlane: {}
@@ -29,6 +29,10 @@ spec:
         name: '{{ ds.meta_data.name }}'
         kubeletExtraArgs:
           node-labels: 'metal3.io/uuid={{ ds.meta_data.uuid }}'
+          # max-pods: "500"
+          # system-reserved: cpu=100m
+          # reserved-cpus: "0"
+          # cpu-manager-policy: static
     users:
       - name: ubuntu
         sudo: 'ALL=(ALL) NOPASSWD:ALL'

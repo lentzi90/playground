@@ -30,6 +30,11 @@ docker run --name image-server-e2e -d \
 
 kubectl create namespace baremetal-operator-system
 
+# If you want to use ClusterClasses
+export CLUSTER_TOPOLOGY=true
+# If you want to use ClusterResourceSets
+export EXP_CLUSTER_RESOURCE_SET=true
+
 clusterctl init --infrastructure=metal3
 kubectl apply -k "${REPO_ROOT}/Metal3/ironic"
 kubectl apply -k "${REPO_ROOT}/Metal3/bmo"

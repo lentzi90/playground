@@ -4,18 +4,25 @@ set -eux
 
 NUM_BMH=${NUM_BMH:-"5"}
 BMO_E2E_EMULATOR=${BMO_E2E_EMULATOR:-"vbmc"}
+MEMORY="${MEMORY:-4096}"
+CPUS="${CPUS:-2}"
 # This is the IP of the host from minikubes point of view
 IP_ADDRESS="192.168.222.1"
 
 REPO_ROOT=$(realpath "$(dirname "${BASH_SOURCE[0]}")/..")
 cd "${REPO_ROOT}" || exit 1
 
+echo "Waiting for ironic deployment to be available..."
+kubectl wait --for=condition=Available --timeout=300s deployment/ironic -n baremetal-operator-system
+
 if [[ "${BMO_E2E_EMULATOR}" == "vbmc" ]]; then
-  # Start VBMC
-  docker run --name vbmc --network host -d \
-    -v /var/run/libvirt/libvirt-sock:/var/run/libvirt/libvirt-sock \
-    -v /var/run/libvirt/libvirt-sock-ro:/var/run/libvirt/libvirt-sock-ro \
-    quay.io/metal3-io/vbmc
+  # Start VBMC if it isn't already running
+  if ! docker ps -a | grep -q "vbmc"; then
+    docker run --name vbmc --network host -d \
+      -v /var/run/libvirt/libvirt-sock:/var/run/libvirt/libvirt-sock \
+      -v /var/run/libvirt/libvirt-sock-ro:/var/run/libvirt/libvirt-sock-ro \
+      quay.io/metal3-io/vbmc
+  fi
 else
   echo "Invalid e2e emulator specified: ${BMO_E2E_EMULATOR}"
   exit 1
@@ -26,14 +33,18 @@ do
   # Create libvirt domain
   VM_NAME="bmo-e2e-${i}"
   export BOOT_MAC_ADDRESS="00:60:2f:31:81:0${i}"
+  # Skip this iteration if the VM already exists
+  if virsh list --all | grep -q "${VM_NAME}"; then
+    continue
+  fi
 
   virt-install \
     --connect qemu:///system \
     --name "${VM_NAME}" \
     --description "Virtualized BareMetalHost" \
     --osinfo=ubuntu-lts-latest \
-    --ram=4096 \
-    --vcpus=2 \
+    --ram="${MEMORY}" \
+    --vcpus="${CPUS}" \
     --disk size=25 \
     --graphics=none \
     --console pty \

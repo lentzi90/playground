@@ -20,7 +20,7 @@ clusterctl init --infrastructure=openstack
 Save the Calico manifest, OpenStack cloud provider and cloud-config secret to be used in the ClusterResourceSet:
 
 ```bash
-kustomize build CAPO/cluster-resources/calico > ClusterResourceSets/calico.yaml
+kustomize build ClusterResourceSets/calico > ClusterResourceSets/calico.yaml
 kustomize build CAPO/cluster-resources/cloud-provider-openstack > ClusterResourceSets/cloud-provider-openstack.yaml
 kubectl -n kube-system create secret generic cloud-config \
   --from-file=clouds.yaml=CAPO/cluster-resources/clouds.yaml \
@@ -136,15 +136,17 @@ sha256 output/ubuntu-2404-kube-v1.31.1/ubuntu-2404-kube-v1.31.1.raw
 # Wait for BMO to come up
 # Create BMHs backed by VMs
 NUM_BMH=5 ./Metal3/create-bmhs.sh
+# (Optional) Apply ClusterResourceSets
+kubectl apply -k ClusterResourceSets
 # Apply cluster
 kubectl apply -k Metal3/cluster
 ```
 
-Add CNI to make nodes healthy:
+Add CNI to make nodes healthy (only needed if you didn't apply the CRS):
 
 ```bash
 clusterctl get kubeconfig test-1 > kubeconfig.yaml
-kubectl --kubeconfig=kubeconfig.yaml apply -k Metal3/cni
+kubectl --kubeconfig=kubeconfig.yaml apply -k ClusterResourceSets/calico
 ```
 
 ### K3s as bootstrap and control-plane provider
@@ -203,3 +205,11 @@ Deploy the kube-prometheus example manifests.
 kubectl apply --server-side=true -k kube-prometheus/setup
 kubectl apply -k kube-prometheus
 ```
+
+Access grafana:
+
+```bash
+kubectl -n monitoring port-forward svc/grafana 3000
+```
+
+Log in to <localhost:3000> using `admin`/`admin`.
