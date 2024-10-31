@@ -149,6 +149,21 @@ clusterctl get kubeconfig test-1 > kubeconfig.yaml
 kubectl --kubeconfig=kubeconfig.yaml apply -k ClusterResourceSets/calico
 ```
 
+### Metal3 cluster-class
+
+```bash
+# (Optional) Apply ClusterResourceSets
+kubectl apply -k ClusterResourceSets
+# Apply ClusterClass
+kubectl apply -k Metal3/cluster-class
+# Create Metal3DataTemplates
+kubectl apply -f Metal3/cluster/metal3datatemplate.yaml
+# Create IPPool
+kubectl apply -f Metal3/cluster/ippool.yaml
+# Create Cluster
+kubectl apply -f Metal3/cluster.yaml
+```
+
 ### K3s as bootstrap and control-plane provider
 
 Add the following to `${HOME}/.cluster-api/clusterctl.yaml`:

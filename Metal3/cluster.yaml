@@ -1,0 +1,18 @@
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  name: test-1
+  labels:
+    cni: calico
+spec:
+  topology:
+    class: lennart-metal3-v0.1.0
+    version: v1.31.1
+    variables:
+      - name: imageChecksum
+        value: aab4cbba9707d14c58931f6e9fb75736d5fe3df0f52a4e19c70609e11b5623af
+    workers:
+      machineDeployments:
+      - class: default-worker
+        name: md-0
+        replicas: 1
