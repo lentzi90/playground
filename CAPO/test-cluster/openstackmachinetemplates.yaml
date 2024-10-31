@@ -7,9 +7,6 @@ spec:
   template:
     spec:
       flavor: c4m4
-      identityRef:
-        cloudName: xerces-capo
-        name: lennart-test-cloud-config
       image:
         id: 9cf21bd2-ad5b-4f98-8eaa-36c749c88015
         # filter:

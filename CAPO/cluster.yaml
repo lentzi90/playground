@@ -9,6 +9,11 @@ spec:
   topology:
     class: lennart-openstack-v0.1.0
     version: v1.28.6
+    variables:
+      - name: identityRef
+        value:
+          name: lennart-test-cloud-config
+          cloudName: xerces-capo
     workers:
       machineDeployments:
       - class: default-worker

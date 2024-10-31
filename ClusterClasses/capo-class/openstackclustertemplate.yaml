@@ -14,16 +14,13 @@ spec:
         enabled: true
         spec:
           flavor: 1C-2GB-50GB
-          identityRef:
-            cloudName: lennart-test-fra1
-            name: ""
           image:
             filter:
               name: Ubuntu 22.04 Jammy Jellyfish x86_64
           sshKeyName: lennart-ed25519
       identityRef:
-        cloudName: lennart-test-fra1
-        name: lennart-test-cloud-config
+        cloudName: name-of-cloud
+        name: secret-name
       managedSecurityGroups:
         allNodesSecurityGroupRules:
         - description: Created by cluster-api-provider-openstack API conversion -

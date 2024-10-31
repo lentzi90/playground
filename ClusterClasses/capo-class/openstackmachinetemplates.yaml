@@ -7,9 +7,6 @@ spec:
   template:
     spec:
       flavor: 4C-4GB-100GB
-      identityRef:
-        cloudName: lennart-test-fra1
-        name: lennart-test-cloud-config
       image:
         filter:
           name: ubuntu-2204-kube
@@ -23,9 +20,6 @@ spec:
   template:
     spec:
       flavor: 4C-4GB-100GB
-      identityRef:
-        cloudName: lennart-test-fra1
-        name: lennart-test-cloud-config
       image:
         filter:
           name: ubuntu-2204-kube

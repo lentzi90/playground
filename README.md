@@ -23,8 +23,8 @@ Save the Calico manifest, OpenStack cloud provider and cloud-config secret to be
 kustomize build ClusterResourceSets/calico > ClusterResourceSets/calico.yaml
 kustomize build ClusterResourceSets/cloud-provider-openstack > ClusterResourceSets/cloud-provider-openstack.yaml
 kubectl -n kube-system create secret generic cloud-config \
-  --from-file=clouds.yaml=ClusterResourceSets/cloud-provider-openstack/clouds.yaml \
-  --from-file=cloud.conf=ClusterResourceSets/cloud-provider-openstack/cloud.conf \
+  --from-file=clouds.yaml=CAPO/credentials/clouds.yaml \
+  --from-file=cloud.conf=CAPO/credentials/cloud.conf \
   --dry-run=client -o yaml > ClusterResourceSets/cloud-config-secret.yaml
 ```
 
@@ -36,22 +36,40 @@ kubectl apply -k ClusterResourceSets
 
 Any cluster with the label `cni=calico` will automatically get Calico deployed and any cluster with the label `cloud=openstack` will automatically get the OpenStack cloud provider deployed now.
 
-### CAPO cluster-class
+### CAPO cluster credentials
 
-Create a `clouds.yaml` file in `ClusterClasses/capo-class`.
+Create `CAPO/credentials/clouds.yaml` file and `CAPO/credentials/cloud.conf` file to be used by the external cloud provider and CAPO:
+
+```ini
+# cloud.conf
+[Global]
+use-clouds=true
+cloud=TODO
+clouds-file=/etc/config/clouds.yaml
+```
+
+Create secrets from the files:
 
 ```bash
-# Create cluster-class/clouds.yaml file to be used by CAPO
+kubectl apply -k CAPO/credentials
+```
+
+### CAPO cluster-class
+
+Apply the ClusterClass:
+
+```bash
 # Apply the cluster-class
-kubectl apply -k ClusterClasses
-# Create a cluster
+kubectl apply -k ClusterClasses/capo-class
+```
+
+Then create a cluster:
+
+```bash
 kubectl apply -f CAPO/cluster.yaml
 ```
 
 ### CAPO cluster
-
-Create a `clouds.yaml` file in `CAPO/test-cluster`.
-Then apply the cluster:
 
 ```bash
 kubectl apply -k CAPO/test-cluster
@@ -59,21 +77,13 @@ kubectl apply -k CAPO/test-cluster
 
 ### CNI and external cloud provider
 
-Create cluster-resources/clouds.yaml (it can be the same as the above) file and cluster-resources/cloud.conf file to be used by the external cloud provider and then apply the cluster-resources:
-
-```ini
-# cluster-resources/cloud.conf
-[Global]
-use-clouds=true
-cloud=TODO
-clouds-file=/etc/config/clouds.yaml
-```
+Apply manually if you did not use the ClusterResourceSets.
 
 ```bash
 # Get the workload cluster kubeconfig
 clusterctl get kubeconfig lennart-test > kubeconfig.yaml
 kubectl --kubeconfig=kubeconfig.yaml apply -k ClusterResourceSets/calico
-kubectl --kubeconfig=kubeconfig.yaml apply -k CAPO/cluster-resources
+kubectl --kubeconfig=kubeconfig.yaml apply -k ClusterResourceSets/cloud-provider-openstack
 ```
 
 ## CAPI In-memory provider
@@ -156,7 +166,7 @@ kubectl --kubeconfig=kubeconfig.yaml apply -k ClusterResourceSets/calico
 # (Optional) Apply ClusterResourceSets
 kubectl apply -k ClusterResourceSets
 # Apply ClusterClass
-kubectl apply -k ClusterClasses
+kubectl apply -k ClusterClasses/metal3-class
 # Create Metal3DataTemplates
 kubectl apply -f Metal3/cluster/metal3datatemplate.yaml
 # Create IPPool
