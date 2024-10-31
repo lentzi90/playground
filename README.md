@@ -21,10 +21,10 @@ Save the Calico manifest, OpenStack cloud provider and cloud-config secret to be
 
 ```bash
 kustomize build ClusterResourceSets/calico > ClusterResourceSets/calico.yaml
-kustomize build CAPO/cluster-resources/cloud-provider-openstack > ClusterResourceSets/cloud-provider-openstack.yaml
+kustomize build ClusterResourceSets/cloud-provider-openstack > ClusterResourceSets/cloud-provider-openstack.yaml
 kubectl -n kube-system create secret generic cloud-config \
-  --from-file=clouds.yaml=CAPO/cluster-resources/clouds.yaml \
-  --from-file=cloud.conf=CAPO/cluster-resources/cloud.conf \
+  --from-file=clouds.yaml=ClusterResourceSets/cloud-provider-openstack/clouds.yaml \
+  --from-file=cloud.conf=ClusterResourceSets/cloud-provider-openstack/cloud.conf \
   --dry-run=client -o yaml > ClusterResourceSets/cloud-config-secret.yaml
 ```
 
@@ -38,12 +38,12 @@ Any cluster with the label `cni=calico` will automatically get Calico deployed a
 
 ### CAPO cluster-class
 
-Create a `clouds.yaml` file in `CAPO/cluster-class`.
+Create a `clouds.yaml` file in `ClusterClasses/capo-class`.
 
 ```bash
 # Create cluster-class/clouds.yaml file to be used by CAPO
 # Apply the cluster-class
-kubectl apply -k CAPO/cluster-class
+kubectl apply -k ClusterClasses
 # Create a cluster
 kubectl apply -f CAPO/cluster.yaml
 ```
@@ -72,6 +72,7 @@ clouds-file=/etc/config/clouds.yaml
 ```bash
 # Get the workload cluster kubeconfig
 clusterctl get kubeconfig lennart-test > kubeconfig.yaml
+kubectl --kubeconfig=kubeconfig.yaml apply -k ClusterResourceSets/calico
 kubectl --kubeconfig=kubeconfig.yaml apply -k CAPO/cluster-resources
 ```
 
@@ -155,7 +156,7 @@ kubectl --kubeconfig=kubeconfig.yaml apply -k ClusterResourceSets/calico
 # (Optional) Apply ClusterResourceSets
 kubectl apply -k ClusterResourceSets
 # Apply ClusterClass
-kubectl apply -k Metal3/cluster-class
+kubectl apply -k ClusterClasses
 # Create Metal3DataTemplates
 kubectl apply -f Metal3/cluster/metal3datatemplate.yaml
 # Create IPPool
