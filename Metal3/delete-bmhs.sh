@@ -18,8 +18,6 @@ done
 for ((i=0; i<NUM_BMH; i++))
 do
   VM_NAME="bmo-e2e-${i}"
-  docker exec vbmc vbmc stop "${VM_NAME}"
-  docker exec vbmc vbmc delete "${VM_NAME}"
   # Stop the VM if it's running
   virsh -c qemu:///system destroy --domain "${VM_NAME}" || true
   # Delete the VM and its storage

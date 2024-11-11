@@ -5,19 +5,23 @@ set -eux
 REPO_ROOT=$(realpath "$(dirname "${BASH_SOURCE[0]}")/..")
 cd "${REPO_ROOT}" || exit 1
 
-# Set up minikube
-minikube start --driver=kvm2
-
 virsh -c qemu:///system net-define "${REPO_ROOT}/Metal3/net.xml"
 virsh -c qemu:///system net-start baremetal-e2e
-# Attach baremetal-e2e interface to minikube with specific mac.
-# This will give minikube a known reserved IP address that we can use for Ironic
-virsh -c qemu:///system attach-interface --domain minikube --mac="52:54:00:6c:3c:01" \
-  --model virtio --source baremetal-e2e --type network --config
 
-# Restart minikube to apply the changes
-minikube stop
-minikube start
+# Create a kind cluster using the configuration from kind.yaml
+kind create cluster --config "${REPO_ROOT}/Metal3/kind.yaml"
+
+# Start dnsmasq container for DHCP
+docker run --name dnsmasq --rm -d --net=host --privileged --user 997:994 \
+  --env-file "${REPO_ROOT}/Metal3/dnsmasq.env" --entrypoint /bin/rundnsmasq \
+  quay.io/metal3-io/ironic
+
+# Start sushy-tools container to provide Redfish BMC emulation
+docker run --name sushy-tools --rm --network host -d \
+  -v /var/run/libvirt:/var/run/libvirt \
+  -v "${REPO_ROOT}/Metal3/sushy-tools.conf:/etc/sushy/sushy-emulator.conf" \
+  -e SUSHY_EMULATOR_CONFIG=/etc/sushy/sushy-emulator.conf \
+  quay.io/metal3-io/sushy-tools:latest sushy-emulator
 
 # Image server variables
 IMAGE_DIR="${REPO_ROOT}/Metal3/images"

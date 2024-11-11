@@ -12,6 +12,28 @@ configMapGenerator:
 
 patches:
   - path: ironic-patch.yaml
+  # The TLS component adds certificates but it cannot know the exact IPs of our environment.
+  # Here we patch the certificates to have the correct IPs.
+  # - 172.18.0.2: kind cluster node IP. This is what Ironic will see attached to the interface
+  #   and use to communicate with Inspector.
+  # - 192.168.222.1: management computer IP in the other network
+  - patch: |-
+      - op: replace
+        path: /spec/ipAddresses/0
+        value: 192.168.222.1
+      - op: add
+        path: /spec/ipAddresses/-
+        value: 172.18.0.2
+    target:
+      kind: Certificate
+      name: ironic-cert
+  # The CA certificate should not have any IP address so we remove it.
+  - patch: |-
+      - op: remove
+        path: /spec/ipAddresses
+    target:
+      kind: Certificate
+      name: ironic-cacert
 
 # Generate the necessary secrets:
 secretGenerator:
@@ -19,28 +41,3 @@ secretGenerator:
   envs:
   - ironic-htpasswd
   name: ironic-htpasswd
-- behavior: create
-  envs:
-  - ironic-inspector-htpasswd
-  name: ironic-inspector-htpasswd
-- name: ironic-auth-config
-  files:
-  - auth-config=ironic-auth-config
-- name: ironic-inspector-auth-config
-  files:
-  - auth-config=ironic-inspector-auth-config
-
-replacements:
-  # Replace IRONIC_HOST_IP in certificates with the PROVISIONING_IP from the configmap
-  - source:
-      kind: ConfigMap
-      name: ironic-bmo-configmap
-      fieldPath: .data.PROVISIONING_IP
-    targets:
-      - select:
-          version: v1
-          group: cert-manager.io
-          kind: Certificate
-          name:
-        fieldPaths:
-          - .spec.ipAddresses.0

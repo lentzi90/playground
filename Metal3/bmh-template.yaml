@@ -16,7 +16,7 @@ metadata:
 spec:
   online: true
   bmc:
-    address: ipmi://VBMC_IP:VBMC_PORT
+    address: redfish-virtualmedia+http://192.168.222.1:8000/redfish/v1/Systems/NAME
     credentialsName: NAME
   bootMACAddress: MAC_ADDRESS
   bootMode: legacy

@@ -5,8 +5,9 @@ cd "${REPO_ROOT}" || exit 1
 
 NUM_BMH=${NUM_BMH:-"5"}
 
-minikube delete
-docker rm -f vbmc
+kind delete cluster
+
+docker rm -f dnsmasq
 docker rm -f image-server-e2e
 docker rm -f sushy-tools
 
