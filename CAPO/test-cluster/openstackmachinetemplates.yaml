@@ -1,4 +1,3 @@
----
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: OpenStackMachineTemplate
 metadata:
@@ -6,13 +5,13 @@ metadata:
 spec:
   template:
     spec:
-      flavor: c4m4
+      flavor: c4m12-est
       image:
         id: 19e017ae-2759-479c-90ac-a400a3f64678
         # filter:
         #   name: Ubuntu-24.04
-      rootVolume:
-        sizeGiB: 100
+      # rootVolume:
+      #   sizeGiB: 100
       sshKeyName: lennart-ed25519
       # ports:
       #   - network:

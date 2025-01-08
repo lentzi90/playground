@@ -11,13 +11,13 @@ spec:
   bastion:
     enabled: false
     spec:
-      flavor: c1m2
+      flavor: c1m2-est
       image:
         id: 19e017ae-2759-479c-90ac-a400a3f64678
         # filter:
         #   name: Ubuntu-24.04
-      rootVolume:
-        sizeGiB: 50
+      # rootVolume:
+      #   sizeGiB: 50
       sshKeyName: lennart-ed25519
   externalNetwork:
     filter:
