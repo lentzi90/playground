@@ -11,12 +11,13 @@ spec:
         - 91.150.49.195/32
         enabled: true
       bastion:
-        enabled: true
+        enabled: false
         spec:
-          flavor: 1C-2GB-50GB
+          flavor: c1m2
           image:
-            filter:
-              name: Ubuntu 22.04 Jammy Jellyfish x86_64
+            id: 9cf21bd2-ad5b-4f98-8eaa-36c749c88015
+            # filter:
+            #   name: Ubuntu-24.04
           sshKeyName: lennart-ed25519
       identityRef:
         cloudName: name-of-cloud

@@ -10,8 +10,8 @@ spec:
           criSocket: unix:///var/run/crio/crio.sock
           kubeletExtraArgs:
             cloud-provider: external
-            provider-id: "openstack:///'{{ instance_id }}'"
-          name: '{{ local_hostname }}'
+            provider-id: "openstack:///'{{ v1.instance_id }}'"
+          name: '{{ v1.local_hostname }}'
       files:
         - path: /etc/sysctl.d/k8s.conf
           content: |

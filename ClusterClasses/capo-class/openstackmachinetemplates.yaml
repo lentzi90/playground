@@ -6,10 +6,12 @@ metadata:
 spec:
   template:
     spec:
-      flavor: 4C-4GB-100GB
+      flavor: c4m4
       image:
         filter:
           name: ubuntu-2204-kube
+      rootVolume:
+        sizeGiB: 100
       sshKeyName: lennart-ed25519
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
@@ -19,8 +21,10 @@ metadata:
 spec:
   template:
     spec:
-      flavor: 4C-4GB-100GB
+      flavor: c4m4
       image:
         filter:
           name: ubuntu-2204-kube
+      rootVolume:
+        sizeGiB: 100
       sshKeyName: lennart-ed25519

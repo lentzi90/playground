@@ -1,4 +1,3 @@
----
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: OpenStackCluster
 metadata:
@@ -14,9 +13,9 @@ spec:
     spec:
       flavor: c1m2
       image:
-        id: 9cf21bd2-ad5b-4f98-8eaa-36c749c88015
+        id: 19e017ae-2759-479c-90ac-a400a3f64678
         # filter:
-        #   name: ubuntu-24.04
+        #   name: Ubuntu-24.04
       rootVolume:
         sizeGiB: 50
       sshKeyName: lennart-ed25519
