@@ -6,7 +6,7 @@ spec:
   apiServerLoadBalancer:
     allowedCIDRs:
     - 10.6.0.0/24
-    - 91.150.49.195/32
+    - 91.150.41.7/32
     enabled: true
   bastion:
     enabled: false
