@@ -11,11 +11,6 @@ virsh -c qemu:///system net-start baremetal-e2e
 # Create a kind cluster using the configuration from kind.yaml
 kind create cluster --config "${REPO_ROOT}/Metal3/kind.yaml"
 
-# Start dnsmasq container for DHCP
-docker run --name dnsmasq --rm -d --net=host --privileged --user 997:994 \
-  --env-file "${REPO_ROOT}/Metal3/dnsmasq.env" --entrypoint /bin/rundnsmasq \
-  quay.io/metal3-io/ironic
-
 # Start sushy-tools container to provide Redfish BMC emulation
 docker run --name sushy-tools --rm --network host -d \
   -v /var/run/libvirt:/var/run/libvirt \
