@@ -8,7 +8,7 @@ spec:
       apiServerLoadBalancer:
         allowedCIDRs:
         - 10.6.0.0/24
-        - 91.150.49.195/32
+        - 91.150.41.7/32
         enabled: true
       bastion:
         enabled: false
@@ -24,8 +24,7 @@ spec:
         name: secret-name
       managedSecurityGroups:
         allNodesSecurityGroupRules:
-        - description: Created by cluster-api-provider-openstack API conversion -
-            BGP (calico)
+        - description: Created by cluster-api-provider-openstack API conversion - BGP (calico)
           direction: ingress
           etherType: IPv4
           name: BGP (calico)
@@ -35,8 +34,7 @@ spec:
           remoteManagedGroups:
           - controlplane
           - worker
-        - description: Created by cluster-api-provider-openstack API conversion -
-            IP-in-IP (calico)
+        - description: Created by cluster-api-provider-openstack API conversion - IP-in-IP (calico)
           direction: ingress
           etherType: IPv4
           name: IP-in-IP (calico)

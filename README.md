@@ -8,6 +8,8 @@ Setup bootstrap cluster:
 
 ```bash
 kind create cluster
+# Install ORC
+kubectl apply -f "https://github.com/k-orc/openstack-resource-controller/releases/latest/download/install.yaml"
 # If you want to use ClusterClasses
 export CLUSTER_TOPOLOGY=true
 # If you want to use ClusterResourceSets
