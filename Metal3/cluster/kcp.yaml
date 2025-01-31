@@ -8,7 +8,7 @@ spec:
     infrastructureRef:
       apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
       kind: Metal3MachineTemplate
-      name: test-1-controlplane-v1-31-1
+      name: test-1-controlplane-v1-32-0
       namespace: default
     nodeDrainTimeout: "0s"
   replicas: 1
@@ -16,7 +16,7 @@ spec:
     rollingUpdate:
       maxSurge: 1
     type: RollingUpdate
-  version: v1.31.1
+  version: v1.32.0
   kubeadmConfigSpec:
     joinConfiguration:
       controlPlane: {}
@@ -34,7 +34,7 @@ spec:
           # reserved-cpus: "0"
           # cpu-manager-policy: static
     users:
-      - name: ubuntu
-        sudo: 'ALL=(ALL) NOPASSWD:ALL'
-        sshAuthorizedKeys:
-        - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF3XsjgwkAkxd5aioPiBws7O5nx5ofcR4TvAIOvSQ9Ce lennart
+    - name: ubuntu
+      sudo: 'ALL=(ALL) NOPASSWD:ALL'
+      sshAuthorizedKeys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF3XsjgwkAkxd5aioPiBws7O5nx5ofcR4TvAIOvSQ9Ce lennart

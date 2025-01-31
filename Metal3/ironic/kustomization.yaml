@@ -22,13 +22,6 @@ patches:
   target:
     kind: Certificate
     name: ironic-cert
-# The CA certificate should not have any IP address so we remove it.
-- patch: |-
-    - op: remove
-      path: /spec/ipAddresses
-  target:
-    kind: Certificate
-    name: ironic-cacert
 
 # Generate the necessary secrets:
 secretGenerator:
