@@ -7,10 +7,10 @@ metadata:
 spec:
   topology:
     class: lennart-metal3-v0.1.0
-    version: v1.31.1
+    version: v1.32.1
     variables:
-      - name: imageChecksum
-        value: aab4cbba9707d14c58931f6e9fb75736d5fe3df0f52a4e19c70609e11b5623af
+    - name: imageChecksum
+      value: cb0ba1e5a579188fabab89a6745891ce8752aef926ffa70ec59b8570fbb7725e
     workers:
       machineDeployments:
       - class: default-worker
