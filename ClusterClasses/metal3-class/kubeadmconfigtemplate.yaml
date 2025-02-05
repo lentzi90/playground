@@ -11,7 +11,7 @@ spec:
           kubeletExtraArgs:
             node-labels: 'metal3.io/uuid={{ ds.meta_data.uuid }}'
       users:
-        - name: ubuntu
-          sudo: 'ALL=(ALL) NOPASSWD:ALL'
-          sshAuthorizedKeys:
-          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF3XsjgwkAkxd5aioPiBws7O5nx5ofcR4TvAIOvSQ9Ce lennart
+      - name: ubuntu
+        sudo: 'ALL=(ALL) NOPASSWD:ALL'
+        sshAuthorizedKeys:
+        - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF3XsjgwkAkxd5aioPiBws7O5nx5ofcR4TvAIOvSQ9Ce lennart

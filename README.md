@@ -151,6 +151,8 @@ sha256 output/ubuntu-2404-kube-v1.31.1/ubuntu-2404-kube-v1.31.1.raw
 NUM_BMH=5 ./Metal3/create-bmhs.sh
 # (Optional) Apply ClusterResourceSets
 kubectl apply -k ClusterResourceSets
+# Apply setup-scripts for installing k8s on plain images
+kubectl apply -k setup-scripts
 # Apply cluster
 kubectl apply -k Metal3/cluster
 ```
@@ -169,10 +171,6 @@ kubectl --kubeconfig=kubeconfig.yaml apply -k ClusterResourceSets/calico
 kubectl apply -k ClusterResourceSets
 # Apply ClusterClass
 kubectl apply -k ClusterClasses/metal3-class
-# Create Metal3DataTemplates
-kubectl apply -f Metal3/cluster/metal3datatemplate.yaml
-# Create IPPool
-kubectl apply -f Metal3/cluster/ippool.yaml
 # Create Cluster
 kubectl apply -f Metal3/cluster.yaml
 ```

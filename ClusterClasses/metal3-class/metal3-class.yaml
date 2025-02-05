@@ -38,6 +38,15 @@ spec:
             name: lennart-metal3-v0.1.0-default-worker
             namespace: default
   variables:
+  - name: imageName
+    required: false
+    schema:
+      openAPIV3Schema:
+        type: string
+        description: |
+          The base name of the disk image that is used for provisioning the servers.
+          This will be combined with the k8s version to create the full name. E.g. imageName-v1.31.2.
+        default: "ubuntu-2404-kube"
   - name: imageChecksum
     required: true
     schema:
@@ -45,6 +54,23 @@ spec:
         type: string
         example: aab4cbba9707d14c58931f6e9fb75736d5fe3df0f52a4e19c70609e11b5623af
         description: "The checksum of the image to use for the servers."
+  - name: addImageVersion
+    required: false
+    schema:
+      openAPIV3Schema:
+        type: boolean
+        description: |
+          Add a suffix with the Kubernetes version to the imageName. E.g. imageName-v1.32.2.
+        default: true
+  - name: injectSetupScripts
+    required: false
+    schema:
+      openAPIV3Schema:
+        type: boolean
+        description: |
+          Use a sysext overlay to add the Kubernetes components to the image.
+          This is for use with flatcar and similar images.
+        default: false
   - name: workerDataTemplateName
     required: false
     schema:
@@ -62,8 +88,8 @@ spec:
         default: test-1-controlplane-template
         description: "The name of the Metal3DataTemplate to use for the control plane."
   patches:
-  - name: controlPlaneImage
-    description: "Sets the image that is used for creating the servers."
+  - name: image
+    description: "Sets the disk image that should be used to provision the servers."
     definitions:
     - selector:
         apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
@@ -75,10 +101,7 @@ spec:
         path: /spec/template/spec/image/url
         valueFrom:
           template: |
-            http://192.168.222.1/ubuntu-2404-kube-{{ .builtin.controlPlane.version }}.raw
-  - name: workerImage
-    description: "Sets the image that is used for creating the servers."
-    definitions:
+            http://192.168.222.1/{{ .imageName }}{{ if .addImageVersion }}-{{ .builtin.controlPlane.version }}{{ end }}.raw
     - selector:
         apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
         kind: Metal3MachineTemplate
@@ -91,9 +114,9 @@ spec:
         path: /spec/template/spec/image/url
         valueFrom:
           template: |
-            http://192.168.222.1/ubuntu-2404-kube-{{ .builtin.machineDeployment.version }}.raw
-  - name: controlPlaneImageChecksum
-    description: "Sets the image checksum from the variable for control plane."
+            http://192.168.222.1/{{ .imageName }}{{ if .addImageVersion }}-{{ .builtin.machineDeployment.version }}{{ end }}.raw
+  - name: imageChecksum
+    description: "Sets the image checksum from the variable."
     definitions:
     - selector:
         apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
@@ -105,9 +128,6 @@ spec:
         path: /spec/template/spec/image/checksum
         valueFrom:
           variable: imageChecksum
-  - name: workerImageChecksum
-    description: "Sets the image checksum from the variable for workers."
-    definitions:
     - selector:
         apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
         kind: Metal3MachineTemplate
@@ -148,3 +168,67 @@ spec:
         path: /spec/template/spec/dataTemplate/name
         valueFrom:
           variable: workerDataTemplateName
+  - name: setupScripts
+    description: "Add scripts for installing k8s on plain cloud images."
+    enabledIf: "{{ .injectSetupScripts }}"
+    definitions:
+    - selector:
+        apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+        kind: KubeadmControlPlaneTemplate
+        matchResources:
+          controlPlane: true
+      jsonPatches:
+      - op: add
+        path: /spec/template/spec/kubeadmConfigSpec/preKubeadmCommands
+        valueFrom:
+          template: |
+            - /tmp/install-k8s.sh
+    - selector:
+        apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+        kind: KubeadmControlPlaneTemplate
+        matchResources:
+          controlPlane: true
+      jsonPatches:
+      - op: add
+        path: /spec/template/spec/kubeadmConfigSpec/files
+        valueFrom:
+          template: |
+            - contentFrom:
+                secret:
+                  key: ubuntu-install-k8s.sh
+                  name: install-k8s
+              path: /tmp/install-k8s.sh
+              owner: root:root
+              permissions: '0755'
+    - selector:
+        apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+        kind: KubeadmConfigTemplate
+        matchResources:
+          machineDeploymentClass:
+            names:
+            - default-worker
+      jsonPatches:
+      - op: add
+        path: /spec/template/spec/files
+        valueFrom:
+          template: |
+            - contentFrom:
+                secret:
+                  key: ubuntu-install-k8s.sh
+                  name: install-k8s
+              path: /tmp/install-k8s.sh
+              owner: root:root
+              permissions: '0755'
+    - selector:
+        apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+        kind: KubeadmConfigTemplate
+        matchResources:
+          machineDeploymentClass:
+            names:
+            - default-worker
+      jsonPatches:
+      - op: add
+        path: /spec/template/spec/preKubeadmCommands
+        valueFrom:
+          template: |
+            - /tmp/install-k8s.sh
