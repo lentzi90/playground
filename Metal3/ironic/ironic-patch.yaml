@@ -5,6 +5,7 @@ metadata:
 spec:
   template:
     spec:
+      hostNetwork: false
       containers:
-        - name: ironic-dnsmasq
-          $patch: delete
+      - name: ironic-dnsmasq
+        $patch: delete

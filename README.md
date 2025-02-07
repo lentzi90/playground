@@ -239,3 +239,33 @@ kubectl -n monitoring port-forward svc/grafana 3000
 ```
 
 Log in to <localhost:3000> using `admin`/`admin`.
+
+## Kubevirt
+
+Setup kind cluster and install BMO/Ironic:
+
+```bash
+kind create cluster
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.17.0/cert-manager.yaml
+kubectl create namespace baremetal-operator-system
+kubectl apply -k Metal3/ironic
+kubectl apply -k Metal3/bmo
+```
+
+Install kubevirt and kubevirtbmc:
+
+```bash
+kubectl create -f "https://github.com/kubevirt/kubevirt/releases/latest/download/kubevirt-operator.yaml"
+kubectl create -f "https://github.com/kubevirt/kubevirt/releases/latest/download/kubevirt-cr.yaml"
+# Add kubevirtbmc
+helm repo add kubevirtbmc https://charts.zespre.com/
+helm repo update
+helm upgrade --install kubevirtbmc kubevirtbmc/kubevirtbmc --namespace=kubevirtbmc-system --create-namespace
+```
+
+Create a VM and a BMH that matches:
+
+```bash
+kubectl apply -f Metal3/vm.yaml
+kubectl apply -f Metal3/bmh.yaml
+```

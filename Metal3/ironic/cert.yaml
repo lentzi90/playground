@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  annotations:
+  name: ironic-cert
+spec:
+  ipAddresses:
+  - 192.168.222.1
+  dnsNames:
+  - ironic
+  - ironic.baremetal-operator-system
+  - ironic.baremetal-operator-system.svc
+  - ironic.baremetal-operator-system.svc.cluster.local

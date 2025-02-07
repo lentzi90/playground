@@ -3,6 +3,7 @@ kind: Kustomization
 namespace: baremetal-operator-system
 resources:
 - https://github.com/metal3-io/baremetal-operator/ironic-deployment/overlays/basic-auth_tls?ref=main
+- service.yaml
 
 configMapGenerator:
 - envs:
@@ -12,16 +13,17 @@ configMapGenerator:
 
 patches:
 - path: ironic-patch.yaml
+- path: cert.yaml
 # The TLS component adds certificates but it cannot know the exact IPs of our environment.
 # Here we patch the certificates to have the correct IPs.
 # - 192.168.222.1: management computer IP, forwarded to ironic inside kind
-- patch: |-
-    - op: replace
-      path: /spec/ipAddresses/0
-      value: 192.168.222.1
-  target:
-    kind: Certificate
-    name: ironic-cert
+# - patch: |-
+#     - op: replace
+#       path: /spec/ipAddresses/0
+#       value: 192.168.222.1
+#   target:
+#     kind: Certificate
+#     name: ironic-cert
 
 # Generate the necessary secrets:
 secretGenerator:
