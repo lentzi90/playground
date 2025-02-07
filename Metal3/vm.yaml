@@ -1,0 +1,38 @@
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: testvm
+spec:
+  runStrategy: Halted
+  template:
+    metadata:
+      labels:
+        kubevirt.io/size: small
+        kubevirt.io/domain: testvm
+    spec:
+      domain:
+        devices:
+          disks:
+          # - name: containerdisk
+          #   disk:
+          #     bus: virtio
+          - name: emptydisk
+            disk:
+              bus: virtio
+          interfaces:
+          - name: default
+            masquerade: {}
+            macAddress: 00:60:2f:31:81:10
+        resources:
+          requests:
+            memory: 2048M
+      networks:
+      - name: default
+        pod: {}
+      volumes:
+      # - name: containerdisk
+      #   containerDisk:
+      #     image: quay.io/kubevirt/cirros-container-disk-demo
+      - name: emptydisk
+        emptyDisk:
+          capacity: 20Gi

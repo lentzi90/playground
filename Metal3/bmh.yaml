@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: testvm
+type: Opaque
+stringData:
+  username: admin
+  password: password
+---
+apiVersion: metal3.io/v1alpha1
+kind: BareMetalHost
+metadata:
+  name: testvm
+  labels:
+    bmh-name: testvm
+spec:
+  online: true
+  bmc:
+    address: redfish-virtualmedia+http://default-testvm-virtbmc.kubevirtbmc-system.svc/redfish/v1/Systems/1
+    # address: ipmi://default-testvm-virtbmc.kubevirtbmc-system.svc.cluster.local
+    credentialsName: testvm
+  # bootMode: legacy
+  bootMACAddress: 00:60:2f:31:81:10
+  rootDeviceHints:
+    deviceName: /dev/vda
