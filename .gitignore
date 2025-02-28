@@ -10,6 +10,7 @@ cherrypick-bot-github-token
 hmac-token
 capi-visualizer/charts
 output.yaml
+tmp
 
 .venv
 

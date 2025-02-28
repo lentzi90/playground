@@ -33,12 +33,15 @@ do
     --graphics=none \
     --console pty \
     --serial pty \
-    --pxe \
     --network network=baremetal-e2e,mac="${BOOT_MAC_ADDRESS}" \
-    --noautoconsole
+    --noautoconsole \
+    --print-xml > "${REPO_ROOT}/Metal3/tmp/${VM_NAME}.xml"
+
+  virsh define "${REPO_ROOT}/Metal3/tmp/${VM_NAME}.xml"
 
   sed -e "s/MAC_ADDRESS/${BOOT_MAC_ADDRESS}/g" -e "s/NAME/${VM_NAME}/g" \
-    "${REPO_ROOT}/Metal3/bmh-template.yaml" | kubectl apply -f -
+    "${REPO_ROOT}/Metal3/bmh-template.yaml" > "${REPO_ROOT}/Metal3/tmp/${VM_NAME}.yaml"
+    kubectl apply -f "${REPO_ROOT}/Metal3/tmp/${VM_NAME}.yaml"
 done
 
 kubectl get bmh
