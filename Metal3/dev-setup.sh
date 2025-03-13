@@ -12,11 +12,11 @@ virsh -c qemu:///system net-start baremetal-e2e
 kind create cluster --config "${REPO_ROOT}/Metal3/kind.yaml"
 
 # Start sushy-tools container to provide Redfish BMC emulation
-docker run --name sushy-tools --rm --network host -d \
-  -v /var/run/libvirt:/var/run/libvirt \
-  -v "${REPO_ROOT}/Metal3/sushy-tools.conf:/etc/sushy/sushy-emulator.conf" \
-  -e SUSHY_EMULATOR_CONFIG=/etc/sushy/sushy-emulator.conf \
-  quay.io/metal3-io/sushy-tools:latest sushy-emulator
+# docker run --name sushy-tools --rm --network host -d \
+#   -v /var/run/libvirt:/var/run/libvirt \
+#   -v "${REPO_ROOT}/Metal3/sushy-tools.conf:/etc/sushy/sushy-emulator.conf" \
+#   -e SUSHY_EMULATOR_CONFIG=/etc/sushy/sushy-emulator.conf \
+#   quay.io/metal3-io/sushy-tools:latest sushy-emulator
 
 # Image server variables
 IMAGE_DIR="${REPO_ROOT}/Metal3/images"
@@ -37,3 +37,9 @@ export EXP_CLUSTER_RESOURCE_SET=true
 clusterctl init --infrastructure=metal3
 kubectl apply -k "${REPO_ROOT}/Metal3/ironic"
 kubectl apply -k "${REPO_ROOT}/Metal3/bmo"
+kubectl create -f "https://github.com/kubevirt/kubevirt/releases/latest/download/kubevirt-operator.yaml"
+kubectl create -f "https://github.com/kubevirt/kubevirt/releases/latest/download/kubevirt-cr.yaml"
+# Add kubevirtbmc
+helm repo add kubevirtbmc https://charts.zespre.com/
+helm repo update
+helm upgrade --install kubevirtbmc kubevirtbmc/kubevirtbmc --namespace=kubevirtbmc-system --create-namespace

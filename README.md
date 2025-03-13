@@ -246,7 +246,7 @@ Setup kind cluster and install BMO/Ironic:
 
 ```bash
 kind create cluster
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.17.0/cert-manager.yaml
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.17.1/cert-manager.yaml
 kubectl create namespace baremetal-operator-system
 kubectl apply -k Metal3/ironic
 kubectl apply -k Metal3/bmo

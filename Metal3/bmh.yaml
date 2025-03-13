@@ -16,10 +16,10 @@ metadata:
 spec:
   online: true
   bmc:
-    address: redfish-virtualmedia+http://default-testvm-virtbmc.kubevirtbmc-system.svc/redfish/v1/Systems/1
+    address: redfish+http://default-testvm-virtbmc.kubevirtbmc-system.svc/redfish/v1/Systems/1
     # address: ipmi://default-testvm-virtbmc.kubevirtbmc-system.svc.cluster.local
     credentialsName: testvm
-  # bootMode: legacy
+  bootMode: legacy
   bootMACAddress: 00:60:2f:31:81:10
   rootDeviceHints:
     deviceName: /dev/vda

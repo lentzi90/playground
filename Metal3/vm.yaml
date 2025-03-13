@@ -21,14 +21,20 @@ spec:
               bus: virtio
           interfaces:
           - name: default
-            masquerade: {}
+            bridge: {}
+          - name: metal3
+            bridge: {}
             macAddress: 00:60:2f:31:81:10
+            bootOrder: 1
         resources:
           requests:
             memory: 2048M
       networks:
       - name: default
         pod: {}
+      - name: metal3
+        hostBridge:
+          bridgeName: metal3
       volumes:
       # - name: containerdisk
       #   containerDisk:
