@@ -6,5 +6,6 @@ secretGenerator:
 - files:
   - ubuntu-install-k8s.sh
   - ubuntu-sysext-k8s.sh
+  - ubuntu-install-k8s-pre-release.sh
   name: install-k8s
   namespace: default

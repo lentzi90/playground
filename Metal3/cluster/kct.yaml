@@ -9,7 +9,7 @@ spec:
       files:
       - contentFrom:
           secret:
-            key: ubuntu-install-k8s.sh
+            key: ubuntu-install-k8s-pre-release.sh
             name: install-k8s
         path: /tmp/install-k8s.sh
         owner: root:root
@@ -25,4 +25,4 @@ spec:
       - name: ubuntu
         sudo: 'ALL=(ALL) NOPASSWD:ALL'
         sshAuthorizedKeys:
-        - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF3XsjgwkAkxd5aioPiBws7O5nx5ofcR4TvAIOvSQ9Ce lennart
+        - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOxg0/L9LWM8K6//pe5OYc7SK4vv6676uz6VRJGA44nl lennart
