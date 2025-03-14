@@ -15,6 +15,7 @@ export CLUSTER_TOPOLOGY=true
 # If you want to use ClusterResourceSets
 export EXP_CLUSTER_RESOURCE_SET=true
 clusterctl init --infrastructure=openstack
+kubectl apply -k setup-scripts
 ```
 
 ### ClusterResourceSets for CNI and cloud provider
