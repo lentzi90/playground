@@ -45,7 +45,8 @@ spec:
         type: string
         description: |
           The base name of the disk image that is used for provisioning the servers.
-          This will be combined with the k8s version to create the full name. E.g. imageName-v1.31.2.
+          If addImageVersion this will be combined with the k8s version to create the full name.
+          E.g. imageName-v1.31.2.
         default: "ubuntu-2404-kube"
   - name: imageChecksum
     required: true

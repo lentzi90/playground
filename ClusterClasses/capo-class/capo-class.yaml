@@ -39,6 +39,38 @@ spec:
             namespace: default
 
   variables:
+  - name: bastion
+    required: false
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          enabled:
+            type: boolean
+            description: "Enable the creation of a bastion host."
+          spec:
+            type: object
+            description: "The spec of the bastion host."
+            properties:
+              flavor:
+                type: string
+                description: "The name of the server flavor."
+              image:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: "The ID of the image."
+                  filter:
+                    type: object
+                    description: "A filter to find the image."
+                    properties:
+                      name:
+                        type: string
+                        description: "The name of the image."
+              sshKeyName:
+                type: string
+                description: "The name of the SSH key-pair for the server."
   - name: identityRef
     required: true
     schema:
@@ -51,6 +83,33 @@ spec:
           cloudName:
             type: string
             description: "The name of the cloud in the OpenStackCloudConfigSecret."
+  - name: imageName
+    required: false
+    schema:
+      openAPIV3Schema:
+        type: string
+        description: |
+          The base name of the disk image that is used for provisioning the servers.
+          If addImageVersion this will be combined with the k8s version to create the full name.
+          E.g. imageName-v1.31.2.
+        default: "ubuntu-2404-kube"
+  - name: addImageVersion
+    required: false
+    schema:
+      openAPIV3Schema:
+        type: boolean
+        description: |
+          Add a suffix with the Kubernetes version to the imageName. E.g. imageName-v1.32.2.
+        default: true
+  - name: injectSetupScripts
+    required: false
+    schema:
+      openAPIV3Schema:
+        type: boolean
+        description: |
+          Use a sysext overlay to add the Kubernetes components to the image.
+          This is for use with flatcar and similar images.
+        default: false
   patches:
   - name: image
     description: "Sets the OpenStack image that is used for creating the servers."
@@ -65,7 +124,7 @@ spec:
         path: /spec/template/spec/image/filter/name
         valueFrom:
           template: |
-            ubuntu-2204-kube-{{ .builtin.controlPlane.version }}
+            {{ .imageName }}{{ if .addImageVersion }}-{{ .builtin.controlPlane.version }}{{ end }}
     - selector:
         apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
         kind: OpenStackMachineTemplate
@@ -78,7 +137,20 @@ spec:
         path: /spec/template/spec/image/filter/name
         valueFrom:
           template: |
-            ubuntu-2204-kube-{{ .builtin.machineDeployment.version }}
+            {{ .imageName }}{{ if .addImageVersion }}-{{ .builtin.machineDeployment.version }}{{ end }}
+  - name: bastion
+    description: "Enable an OpenStack bastion host."
+    definitions:
+    - selector:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        kind: OpenStackClusterTemplate
+        matchResources:
+          infrastructureCluster: true
+      jsonPatches:
+      - op: add
+        path: /spec/template/spec/bastion
+        valueFrom:
+          variable: bastion
   - name: identityRef
     description: "Sets the OpenStack identity reference."
     definitions:
@@ -114,3 +186,67 @@ spec:
         path: /spec/template/spec/identityRef
         valueFrom:
           variable: identityRef
+  - name: setupScripts
+    description: "Add scripts for installing k8s on plain cloud images."
+    enabledIf: "{{ .injectSetupScripts }}"
+    definitions:
+    - selector:
+        apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+        kind: KubeadmControlPlaneTemplate
+        matchResources:
+          controlPlane: true
+      jsonPatches:
+      - op: add
+        path: /spec/template/spec/kubeadmConfigSpec/preKubeadmCommands
+        valueFrom:
+          template: |
+            - KUBERNETES_VERSION={{ .builtin.controlPlane.version }} /tmp/install-k8s.sh
+    - selector:
+        apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+        kind: KubeadmControlPlaneTemplate
+        matchResources:
+          controlPlane: true
+      jsonPatches:
+      - op: add
+        path: /spec/template/spec/kubeadmConfigSpec/files
+        valueFrom:
+          template: |
+            - contentFrom:
+                secret:
+                  key: ubuntu-install-k8s-pre-release.sh
+                  name: install-k8s
+              path: /tmp/install-k8s.sh
+              owner: root:root
+              permissions: '0755'
+    - selector:
+        apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+        kind: KubeadmConfigTemplate
+        matchResources:
+          machineDeploymentClass:
+            names:
+            - default-worker
+      jsonPatches:
+      - op: add
+        path: /spec/template/spec/files
+        valueFrom:
+          template: |
+            - contentFrom:
+                secret:
+                  key: ubuntu-install-k8s-pre-release.sh
+                  name: install-k8s
+              path: /tmp/install-k8s.sh
+              owner: root:root
+              permissions: '0755'
+    - selector:
+        apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+        kind: KubeadmConfigTemplate
+        matchResources:
+          machineDeploymentClass:
+            names:
+            - default-worker
+      jsonPatches:
+      - op: add
+        path: /spec/template/spec/preKubeadmCommands
+        valueFrom:
+          template: |
+            - KUBERNETES_VERSION={{ .builtin.machineDeployment.version }} /tmp/install-k8s.sh

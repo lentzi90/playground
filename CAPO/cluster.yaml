@@ -8,12 +8,28 @@ metadata:
 spec:
   topology:
     class: lennart-openstack-v0.1.0
-    version: v1.31.1
+    version: v1.33.0-rc.0
     variables:
-      - name: identityRef
-        value:
-          name: lennart-test-cloud-config
-          cloudName: xerces-capo
+    - name: identityRef
+      value:
+        name: lennart-test-cloud-config
+        cloudName: xerces-capo
+    - name: imageName
+      value: "Ubuntu-24.04"
+    - name: addImageVersion
+      value: false
+    - name: injectSetupScripts
+      value: true
+    - name: bastion
+      value:
+        enabled: true
+        spec:
+          flavor: c1m2-est
+          image:
+            id: 19e017ae-2759-479c-90ac-a400a3f64678
+            # filter:
+            #   name: Ubuntu-24.04
+          sshKeyName: lennart-ed25519
     workers:
       machineDeployments:
       - class: default-worker

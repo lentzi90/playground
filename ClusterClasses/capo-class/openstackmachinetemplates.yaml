@@ -1,4 +1,3 @@
----
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: OpenStackMachineTemplate
 metadata:
@@ -6,12 +5,10 @@ metadata:
 spec:
   template:
     spec:
-      flavor: c4m4
+      flavor: c4m12-est
       image:
         filter:
           name: ubuntu-2204-kube
-      rootVolume:
-        sizeGiB: 100
       sshKeyName: lennart-ed25519
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
@@ -21,10 +18,8 @@ metadata:
 spec:
   template:
     spec:
-      flavor: c4m4
+      flavor: c4m12-est
       image:
         filter:
           name: ubuntu-2204-kube
-      rootVolume:
-        sizeGiB: 100
       sshKeyName: lennart-ed25519

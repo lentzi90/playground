@@ -1,13 +1,24 @@
 #!/usr/bin/env bash
 
-KUBERNETES_VERSION=v1.33.0-beta.0
+KUBERNETES_VERSION="${KUBERNETES_VERSION:-v1.32.1}"
 # KUBERNETES_VERSION="$(curl -sSL https://dl.k8s.io/release/stable.txt)"
 
 # Kubernetes release tooling
 # See https://github.com/kubernetes/release/releases
-RELEASE_VERSION="v0.18.0"
+RELEASE_VERSION="${RELEASE_VERSION:-v0.18.0}"
 
-ARCH="amd64"
+# https://github.com/kubernetes-sigs/cri-tools/releases
+CRICTL_VERSION="v1.32.0"
+
+# https://github.com/containernetworking/plugins/releases
+CNI_PLUGINS_VERSION="v1.3.0"
+
+ARCH=$(dpkg --print-architecture)
+
+echo "Installing Kubernetes ${KUBERNETES_VERSION} on $${ARCH} architecture"
+echo "Using release version ${RELEASE_VERSION}"
+echo "Using CRI tools version ${CRICTL_VERSION}"
+echo "Using CNI plugins version ${CNI_PLUGINS_VERSION}"
 
 # Update system
 sudo apt-get update && sudo apt-get upgrade -y
@@ -20,11 +31,9 @@ sudo apt-get update
 sudo apt-get install -y containerd
 
 # Install crictl
-CRICTL_VERSION="v1.32.0"
 curl -L "https://github.com/kubernetes-sigs/cri-tools/releases/download/${CRICTL_VERSION}/crictl-${CRICTL_VERSION}-linux-${ARCH}.tar.gz" | sudo tar -C /usr/local/bin -xz
 
 # Install CNI plugins
-CNI_PLUGINS_VERSION="v1.3.0"
 DEST="/opt/cni/bin"
 sudo mkdir -p "${DEST}"
 curl -L "https://github.com/containernetworking/plugins/releases/download/${CNI_PLUGINS_VERSION}/cni-plugins-linux-${ARCH}-${CNI_PLUGINS_VERSION}.tgz" | sudo tar -C "$DEST" -xz
