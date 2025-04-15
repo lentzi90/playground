@@ -8,7 +8,7 @@ metadata:
 spec:
   topology:
     class: lennart-openstack-v0.1.0
-    version: v1.33.0-rc.0
+    version: v1.32.2
     variables:
     - name: identityRef
       value:
@@ -22,7 +22,7 @@ spec:
       value: true
     - name: bastion
       value:
-        enabled: true
+        enabled: false
         spec:
           flavor: c1m2-est
           image:
