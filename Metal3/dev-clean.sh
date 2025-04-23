@@ -19,5 +19,8 @@ done
 
 virsh -c qemu:///system net-destroy baremetal-e2e
 virsh -c qemu:///system net-undefine baremetal-e2e
+virsh -c qemu:///system pool-destroy baremetal-e2e
+virsh -c qemu:///system pool-delete baremetal-e2e
+virsh -c qemu:///system pool-undefine baremetal-e2e
 
 # rm -rfv "${REPO_ROOT}/Metal3/images"

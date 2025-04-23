@@ -7,6 +7,9 @@ cd "${REPO_ROOT}" || exit 1
 
 virsh -c qemu:///system net-define "${REPO_ROOT}/Metal3/net.xml"
 virsh -c qemu:///system net-start baremetal-e2e
+virsh -c qemu:///system pool-define-as --name=baremetal-e2e --type=dir --target=/tmp/baremetal-e2e
+virsh -c qemu:///system pool-build baremetal-e2e
+virsh -c qemu:///system pool-start baremetal-e2e
 
 # Create a kind cluster using the configuration from kind.yaml
 kind create cluster --config "${REPO_ROOT}/Metal3/kind.yaml"

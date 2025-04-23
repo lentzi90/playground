@@ -29,7 +29,8 @@ do
     --osinfo=ubuntu-lts-latest \
     --ram="${MEMORY}" \
     --vcpus="${CPUS}" \
-    --disk size=25 \
+    --disk size=25,pool=baremetal-e2e \
+    --disk device=cdrom,size=2,pool=baremetal-e2e \
     --graphics=none \
     --console pty \
     --serial pty \
