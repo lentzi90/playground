@@ -1,0 +1,36 @@
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  labels:
+    kubevirt.io/os: linux
+  name: coreos
+spec:
+  runStrategy: Always
+  template:
+    metadata:
+      labels:
+        kubevirt.io/domain: coreos
+    spec:
+      domain:
+        cpu:
+          cores: 2
+        devices:
+          disks:
+          - name: containerdisk
+            disk:
+              bus: virtio
+          - name: cloudinitdisk
+            disk:
+              bus: virtio
+        resources:
+          requests:
+            memory: 1024M
+      volumes:
+      - name: containerdisk
+        containerDisk:
+          image: quay.io/fedora/fedora-coreos-kubevirt:stable
+          imagePullPolicy: Always # The tag is pointing to the latest stable release
+      - name: cloudinitdisk
+        cloudInitConfigDrive:
+          secretRef:
+            name: ignition-payload

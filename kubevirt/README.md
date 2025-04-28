@@ -43,3 +43,15 @@ kubectl apply -f fedora42_virtualmachine.yaml
 # Connect to the console
 kubectl virt console fedora42
 ```
+
+Test Fedora CoreOS using OCI artifact:
+
+```bash
+# Generate ignition config from butane (coreos-user.yaml)
+podman run --interactive --rm quay.io/coreos/butane:release \
+       --pretty --strict < coreos-user.yaml > ignition.json
+kubectl create secret generic ignition-payload --from-file=userdata=ignition.json
+kubectl apply -f coreos_virtualmachine.yaml
+# Connect to the console
+kubectl virt console coreos
+```
