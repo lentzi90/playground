@@ -7,7 +7,7 @@ spec:
     files:
     - contentFrom:
         secret:
-          key: ubuntu-install-k8s-pre-release.sh
+          key: ubuntu-install-k8s-release-artifacts.sh
           name: install-k8s
       path: /tmp/install-k8s.sh
       owner: root:root
