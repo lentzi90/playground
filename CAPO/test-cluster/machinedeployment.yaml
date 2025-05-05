@@ -18,4 +18,4 @@ spec:
         apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
         kind: OpenStackMachineTemplate
         name: lennart-test-plain
-      version: v1.33.0-rc.0
+      version: v1.33.0
