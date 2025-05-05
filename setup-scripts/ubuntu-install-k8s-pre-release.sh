@@ -54,6 +54,9 @@ containerd config default | sudo tee /etc/containerd/config.toml
 
 # Enable SystemdCgroup
 sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
+# Enable device ownership from security context. Needed for kubevirt CDI block devices.
+# See https://github.com/kubevirt/containerized-data-importer/blob/main/doc/block_cri_ownership_config.md
+sudo sed -i 's/device_ownership_from_security_context = false/device_ownership_from_security_context = true/' /etc/containerd/config.toml
 sudo systemctl restart containerd
 sudo systemctl enable containerd
 
