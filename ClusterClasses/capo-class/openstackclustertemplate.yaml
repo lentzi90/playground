@@ -8,7 +8,6 @@ spec:
       apiServerLoadBalancer:
         allowedCIDRs:
         - 10.6.0.0/24
-        - 91.150.41.7/32
         enabled: true
       identityRef:
         cloudName: name-of-cloud

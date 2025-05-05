@@ -30,6 +30,10 @@ spec:
             # filter:
             #   name: Ubuntu-24.04
           sshKeyName: lennart-ed25519
+    - name: allowedCIDRs
+      value:
+      - 10.6.0.0/24
+      - 91.150.41.7/32
     workers:
       machineDeployments:
       - class: default-worker

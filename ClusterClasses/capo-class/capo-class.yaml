@@ -110,6 +110,18 @@ spec:
           Use a sysext overlay to add the Kubernetes components to the image.
           This is for use with flatcar and similar images.
         default: false
+  - name: allowedCIDRs
+    required: false
+    schema:
+      openAPIV3Schema:
+        type: array
+        items:
+          type: string
+        description: |
+          A list of CIDR ranges that are allowed to access the API server load balancer.
+          This is only used if apiServerLoadBalancer.enabled is true.
+        default:
+        - 10.6.0.0/24
   patches:
   - name: image
     description: "Sets the OpenStack image that is used for creating the servers."
@@ -250,3 +262,16 @@ spec:
         valueFrom:
           template: |
             - KUBERNETES_VERSION={{ .builtin.machineDeployment.version }} /tmp/install-k8s.sh
+  - name: allowedCIDRs
+    description: "Sets the allowed CIDRs for the API server load balancer."
+    definitions:
+    - selector:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        kind: OpenStackClusterTemplate
+        matchResources:
+          infrastructureCluster: true
+      jsonPatches:
+      - op: add
+        path: /spec/template/spec/apiServerLoadBalancer/allowedCIDRs
+        valueFrom:
+          variable: allowedCIDRs
