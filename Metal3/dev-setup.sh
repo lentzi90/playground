@@ -35,5 +35,6 @@ export CLUSTER_TOPOLOGY=true
 export EXP_CLUSTER_RESOURCE_SET=true
 
 clusterctl init --infrastructure=metal3
+curl -Ls https://github.com/metal3-io/ip-address-manager/releases/latest/download/ipam-components.yaml | clusterctl generate yaml | kubectl apply -f -
 kubectl apply -k "${REPO_ROOT}/Metal3/ironic"
 kubectl apply -k "${REPO_ROOT}/Metal3/bmo"
