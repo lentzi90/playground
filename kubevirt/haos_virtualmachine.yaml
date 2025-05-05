@@ -1,0 +1,32 @@
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  labels:
+    kubevirt.io/os: linux
+  name: haos
+spec:
+  runStrategy: Always
+  template:
+    metadata:
+      labels:
+        kubevirt.io/domain: haos
+    spec:
+      domain:
+        cpu:
+          cores: 2
+        devices:
+          disks:
+          - disk:
+              bus: virtio
+            name: disk0
+        resources:
+          requests:
+            memory: 1024M
+        firmware:
+          bootloader:
+            efi:
+              secureBoot: false
+      volumes:
+      - name: disk0
+        persistentVolumeClaim:
+          claimName: haos
