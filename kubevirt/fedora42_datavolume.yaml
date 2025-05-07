@@ -4,7 +4,6 @@ metadata:
   name: "fedora42"
 spec:
   storage:
-    storageClassName: local-immediate
     accessModes:
     - ReadWriteOnce
     resources:

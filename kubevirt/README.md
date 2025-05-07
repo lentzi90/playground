@@ -25,9 +25,6 @@ export VERSION=$(basename $(curl -s -w %{redirect_url} https://github.com/kubevi
 echo ${VERSION}
 kubectl create -f https://github.com/kubevirt/containerized-data-importer/releases/download/${VERSION}/cdi-operator.yaml
 kubectl create -f https://github.com/kubevirt/containerized-data-importer/releases/download/${VERSION}/cdi-cr.yaml
-# Create storageclass with "immediate" volume binding mode
-# Otherwise CDI will not be able to download the image because it waits for the volume
-kubectl apply -f storageclass.yaml
 ```
 
 NOTE! The CRI may need extra configuration to make block device imports work.
@@ -65,6 +62,8 @@ kubectl virt console coreos
 This is using EFI boot also and shows how to upload a local image through the CDI proxy.
 See https://www.home-assistant.io/installation/linux
 
+This has been tested in a CAPO cluster (not kind like the previous tests).
+
 Use CLI to upload the image:
 ```bash
 wget https://github.com/home-assistant/operating-system/releases/download/15.2/haos_ova-15.2.qcow2.xz
@@ -83,6 +82,9 @@ Alternatively, apply the datavolume to download the image from the internet:
 
 ```bash
 kubectl apply -f haos_datavolume.yaml
+# The local-path provisioner cannot create the volume until it knows which node to use
+# This is only an issue when using the local-path provisioner that comes with kind
+kubectl annotate pvc haos volume.kubernetes.io/selected-node=kind-control-plane
 ```
 
 Create the VM:
@@ -93,7 +95,13 @@ kubectl apply -f haos_virtualmachine.yaml
 kubectl virt console haos
 
 # Port forward to access the Home Assistant web interface
+# This does not work with kind
 kubectl virt port-forward vm/haos 8123
+
+# For kind, do this instead
+ip_address="$(kubectl get node kind-control-plane -o jsonpath="{.status.addresses[0].address}")"
+kubectl virt export vm/haos --port 8123 --name haos --external-ip "${ip_address}"
+echo "Access Home Assistant at http://${ip_address}:8123"
 ```
 
 Now go to http://localhost:8123 to see that Home Assistant is running.
