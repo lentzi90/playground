@@ -32,9 +32,8 @@ do
     --ram="${MEMORY}" \
     --vcpus="${CPUS}" \
     --disk size=25 \
-    --graphics=none \
-    --console pty \
-    --serial pty \
+    --boot hd,network \
+    --import \
     --network network=baremetal-e2e,mac="${BOOT_MAC_ADDRESS}" \
     --noautoconsole \
     --print-xml > "${REPO_ROOT}/Metal3/tmp/${VM_NAME}.xml"
