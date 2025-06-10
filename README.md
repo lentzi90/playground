@@ -168,12 +168,14 @@ kubectl apply -k ClusterResourceSets
 kubectl apply -k setup-scripts
 # Apply cluster
 kubectl apply -k Metal3/cluster
+
+# Get the kubeconfig for the workload cluster
+clusterctl get kubeconfig test-1 > kubeconfig.yaml
 ```
 
 Add CNI to make nodes healthy (only needed if you didn't apply the CRS):
 
 ```bash
-clusterctl get kubeconfig test-1 > kubeconfig.yaml
 kubectl --kubeconfig=kubeconfig.yaml apply -k ClusterResourceSets/calico
 ```
 
@@ -186,6 +188,61 @@ kubectl apply -k ClusterResourceSets
 kubectl apply -k ClusterClasses/metal3-class
 # Create Cluster
 kubectl apply -f Metal3/cluster.yaml
+```
+
+### Move from bootstrap to management cluster
+
+Turn the workload cluster into a management cluster.
+
+```bash
+clusterctl init --control-plane kubeadm --infrastructure metal3 --ipam metal3
+# Install Ironic and BMO
+kubectl apply -k Metal3/bmo-management
+kubectl apply -k Metal3/ironic-management
+```
+
+Back in the bootstrap cluster, do the move:
+
+```bash
+# Label CRDs to include in move
+kubectl label crd baremetalhosts.metal3.io clusterctl.cluster.x-k8s.io=""
+kubectl label crd baremetalhosts.metal3.io cluster.x-k8s.io/move=""
+kubectl label crd hardwaredata.metal3.io clusterctl.cluster.x-k8s.io=""
+kubectl label crd hardwaredata.metal3.io clusterctl.cluster.x-k8s.io/move=""
+
+# Move the cluster. This will also move the BMHs and hardwaredata that are part of the cluster.
+clusterctl move --to-kubeconfig=kubeconfig.yaml
+
+# Manually move BMHs that are not part of the cluster
+mkdir -p Metal3/tmp/bmhs
+for bmh in $(kubectl get bmh -o jsonpath="{.items[*].metadata.name}"); do
+  echo "Saving BMH ${bmh}..."
+  # Save the BMH status
+  # Remove status.hardware since this is part of the hardwaredata
+  kubectl get bmh "${bmh}" -o jsonpath="{.status}" |
+   jq 'del(.hardware)' > "Metal3/tmp/bmhs/${bmh}-status.json"
+  # Save the BMH with the status annotation
+  kubectl annotate bmh "${bmh}" \
+    baremetalhost.metal3.io/status="$(cat Metal3/tmp/bmhs/${bmh}-status.json)" \
+    --dry-run=client -o yaml > "Metal3/tmp/bmhs/${bmh}-bmh.yaml"
+  # Save the hardwaredata
+  kubectl get hardwaredata "${bmh}" -o yaml > "Metal3/tmp/bmhs/${bmh}-hardwaredata.yaml"
+  # Save the BMC credentials
+  secret="$(kubectl get bmh "${bmh}" -o jsonpath="{.spec.bmc.credentialsName}")"
+  kubectl get secret "${secret}" -o yaml > "Metal3/tmp/bmhs/${bmh}-bmc-secret.yaml"
+
+  # Detach BMHs
+  kubectl annotate bmh "${bmh}" baremetalhost.metal3.io/detached="manual-move"
+  # Cleanup
+  rm "Metal3/tmp/bmhs/${bmh}-status.json"
+done
+
+# Apply the BMHs and hardwaredata in the management cluster
+kubectl apply -f Metal3/tmp/bmhs
+
+# Cleanup
+kubectl delete bmh --all
+rm -r Metal3/tmp/bmhs
 ```
 
 ### K3s as bootstrap and control-plane provider
@@ -212,18 +269,44 @@ kubectl apply -k Metal3/k3s
 
 ### Kamaji as control-plane provider
 
+- Create workload cluster using Metal3 as normal
+- Approve CSRs!
+- Turn it into a management cluster by initializing it with Kamaji and Metal3
+- Pivot from the bootstrap cluster
+- Create a workload cluster with hosted control plane in the management cluster
+
 ```bash
+# Do a normal bootstrap cluster setup with Metal3 first.
+# Continue here after moving from the bootstrap to the management cluster.
+# Tested with v0.15.2
 clusterctl init --control-plane kamaji
-# Install metallb
-kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.12/config/manifests/metallb-native.yaml
+# Install metallb (needed for Kamaji k8s API endpoints)
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.15.2/config/manifests/metallb-native.yaml
 # Create an IPAddressPool and L2Advertisement
 kubectl apply -k Metal3/metallb
+# Install local-path-provisioner (needed for Kamaji etcd)
+kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/v0.0.31/deploy/local-path-storage.yaml
+kubectl patch storageclass local-path -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+
 # Install kamaji
 helm repo add clastix https://clastix.github.io/charts
 helm repo update
-helm install kamaji clastix/kamaji -n kamaji-system --create-namespace
-# Wait for them to be ready, then continue
+helm install kamaji clastix/kamaji \
+  --version 0.0.0+latest \
+  --namespace kamaji-system \
+  --create-namespace \
+  --set image.tag=latest
+
+kubectl apply -k setup-scripts
+
+# Create the workload cluster with Kamaji as control-plane provider
 kubectl apply -k Metal3/kamaji
+
+# TODO: Had to manually patch the kamaji control-plane as it got stuck waiting for the API endpoint.
+# Just change the number of replicas.
+
+# Get the workload cluster kubeconfig
+clusterctl get kubeconfig kamaji-1 > hosted.yaml
 ```
 
 ## CAPI visualizer
