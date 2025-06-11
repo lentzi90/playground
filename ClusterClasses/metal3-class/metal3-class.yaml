@@ -38,6 +38,22 @@ spec:
             name: lennart-metal3-v0.1.0-default-worker
             namespace: default
   variables:
+  - name: controlPlaneEndpoint
+    required: false
+    schema:
+      openAPIV3Schema:
+        type: object
+        description: "The control plane endpoint configuration"
+        properties:
+          host:
+            type: string
+            description: "The host IP address for the control plane endpoint"
+          port:
+            type: integer
+            description: "The port number for the control plane endpoint"
+        default:
+          host: "192.168.222.100"
+          port: 6443
   - name: imageName
     required: false
     schema:
@@ -106,6 +122,19 @@ spec:
         example: test-1-controlplane-template
         description: "The name of the Metal3DataTemplate to use for the control plane."
   patches:
+  - name: controlPlaneEndpoint
+    description: "Configure the control plane endpoint host and port"
+    definitions:
+    - selector:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        kind: Metal3ClusterTemplate
+        matchResources:
+          infrastructureCluster: true
+      jsonPatches:
+      - op: replace
+        path: /spec/template/spec/controlPlaneEndpoint
+        valueFrom:
+          variable: controlPlaneEndpoint
   - name: image
     description: "Sets the disk image that should be used to provision the servers."
     definitions:

@@ -9,6 +9,9 @@ spec:
     class: lennart-metal3-v0.1.0
     version: v1.33.1
     variables:
+    - name: controlPlaneEndpoint
+      value:
+        host: 192.168.222.100
     - name: imageName
       value: ubuntu-2404
     - name: addImageVersion
