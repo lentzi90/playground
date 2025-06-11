@@ -7,15 +7,15 @@ spec:
   kubelet:
     cgroupfs: systemd
     preferredAddressTypes:
-      - ExternalIP
-      - InternalIP
-      - Hostname
+    - ExternalIP
+    - InternalIP
+    - Hostname
   addons:
-    coreDNS: { }
-    kubeProxy: { }
+    coreDNS: {}
+    kubeProxy: {}
   network:
     serviceType: LoadBalancer
     serviceAddress: 192.168.222.150
   deployment:
   replicas: 2
-  version: 1.28.5
+  version: 1.33.0
