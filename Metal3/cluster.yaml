@@ -7,7 +7,7 @@ metadata:
 spec:
   topology:
     class: lennart-metal3-v0.1.0
-    version: v1.33.0
+    version: v1.33.1
     variables:
     - name: imageName
       value: ubuntu-2404
@@ -17,6 +17,12 @@ spec:
       value: cb0ba1e5a579188fabab89a6745891ce8752aef926ffa70ec59b8570fbb7725e
     - name: injectSetupScripts
       value: true
+    - name: users
+      value:
+      - name: ubuntu
+        sudo: 'ALL=(ALL) NOPASSWD:ALL'
+        sshAuthorizedKeys:
+        - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOxg0/L9LWM8K6//pe5OYc7SK4vv6676uz6VRJGA44nl lennart
     workers:
       machineDeployments:
       - class: default-worker

@@ -6,8 +6,6 @@ resources:
 - kubeadmcontrolplanetemplate.yaml
 - metal3clustertemplate.yaml
 - metal3machinetemplates.yaml
-- metal3datatemplate.yaml
-- ippool.yaml
 
 generatorOptions:
   disableNameSuffixHash: true

@@ -72,21 +72,38 @@ spec:
           Use a sysext overlay to add the Kubernetes components to the image.
           This is for use with flatcar and similar images.
         default: false
+  - name: users
+    required: false
+    schema:
+      openAPIV3Schema:
+        type: array
+        description: "List of users to create on the nodes with their SSH keys and sudo access"
+        items:
+          type: object
+          properties:
+            name:
+              type: string
+            sudo:
+              type: string
+            sshAuthorizedKeys:
+              type: array
+              items:
+                type: string
+          required:
+          - name
   - name: workerDataTemplateName
     required: false
     schema:
       openAPIV3Schema:
         type: string
-        example: my-template
-        default: test-1-workers-template
+        example: test-1-workers-template
         description: "The name of the Metal3DataTemplate to use for the workers."
   - name: controlPlaneDataTemplateName
     required: false
     schema:
       openAPIV3Schema:
         type: string
-        example: my-template
-        default: test-1-controlplane-template
+        example: test-1-controlplane-template
         description: "The name of the Metal3DataTemplate to use for the control plane."
   patches:
   - name: image
@@ -141,7 +158,34 @@ spec:
         path: /spec/template/spec/image/checksum
         valueFrom:
           variable: imageChecksum
+  - name: users
+    description: "Configure the users, their SSH keys and sudo access"
+    definitions:
+    - selector:
+        apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+        kind: KubeadmControlPlaneTemplate
+        matchResources:
+          controlPlane: true
+      jsonPatches:
+      - op: add
+        path: /spec/template/spec/kubeadmConfigSpec/users
+        valueFrom:
+          variable: users
+    - selector:
+        apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+        kind: KubeadmConfigTemplate
+        matchResources:
+          machineDeploymentClass:
+            names:
+            - default-worker
+      jsonPatches:
+      - op: add
+        path: /spec/template/spec/users
+        valueFrom:
+          variable: users
   - name: controlPlaneDataTemplate
+    # TODO: Properly support optional Metal3DataTemplate
+    enabledIf: "false"
     description: "Sets the Metal3DataTemplate for the control plane"
     definitions:
     - selector:
@@ -155,6 +199,8 @@ spec:
         valueFrom:
           variable: controlPlaneDataTemplateName
   - name: workerDataTemplate
+    # TODO: Properly support optional Metal3DataTemplate
+    enabledIf: "false"
     description: "Sets the Metal3DataTemplate for workers"
     definitions:
     - selector:
@@ -183,7 +229,7 @@ spec:
         path: /spec/template/spec/kubeadmConfigSpec/preKubeadmCommands
         valueFrom:
           template: |
-            - /tmp/install-k8s.sh
+            - KUBERNETES_VERSION={{ .builtin.controlPlane.version }} /tmp/install-k8s.sh
     - selector:
         apiVersion: controlplane.cluster.x-k8s.io/v1beta1
         kind: KubeadmControlPlaneTemplate
@@ -196,7 +242,7 @@ spec:
           template: |
             - contentFrom:
                 secret:
-                  key: ubuntu-install-k8s.sh
+                  key: ubuntu-install-k8s-release-artifacts.sh
                   name: install-k8s
               path: /tmp/install-k8s.sh
               owner: root:root
@@ -215,7 +261,7 @@ spec:
           template: |
             - contentFrom:
                 secret:
-                  key: ubuntu-install-k8s.sh
+                  key: ubuntu-install-k8s-release-artifacts.sh
                   name: install-k8s
               path: /tmp/install-k8s.sh
               owner: root:root
@@ -232,4 +278,4 @@ spec:
         path: /spec/template/spec/preKubeadmCommands
         valueFrom:
           template: |
-            - /tmp/install-k8s.sh
+            - KUBERNETES_VERSION={{ .builtin.machineDeployment.version }} /tmp/install-k8s.sh
