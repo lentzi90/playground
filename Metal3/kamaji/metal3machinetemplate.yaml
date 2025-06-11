@@ -8,8 +8,6 @@ spec:
   template:
     spec:
       automatedCleaningMode: disabled
-      dataTemplate:
-        name: kamaji-1-workers-template
       image:
         checksum: cb0ba1e5a579188fabab89a6745891ce8752aef926ffa70ec59b8570fbb7725e
         checksumType: sha256

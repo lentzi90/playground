@@ -301,6 +301,9 @@ kubectl apply -k setup-scripts
 
 # Create the workload cluster with Kamaji as control-plane provider
 kubectl apply -k Metal3/kamaji
+# The above has a hard-coded API endpoint and cluster name.
+# Another cluster can be created by changing these.
+kustomize build Metal3/kamaji | sed -e "s/kamaji-1/kamaji-2/g" -e "s/192.168.222.150/192.168.222.160/g" | kubectl apply -f -
 
 # TODO: Had to manually patch the kamaji control-plane as it got stuck waiting for the API endpoint.
 # Just change the number of replicas.

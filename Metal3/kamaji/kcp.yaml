@@ -15,7 +15,8 @@ spec:
     kubeProxy: {}
   network:
     serviceType: LoadBalancer
-    serviceAddress: 192.168.222.150
+    serviceAnnotations:
+      metallb.io/loadBalancerIPs: "192.168.222.150"
   deployment:
   replicas: 2
   version: 1.33.0
