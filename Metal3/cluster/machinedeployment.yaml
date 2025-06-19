@@ -8,7 +8,7 @@ metadata:
     nodepool: nodepool-0
 spec:
   clusterName: test-1
-  replicas: 0
+  replicas: 1
   selector:
     matchLabels:
       cluster.x-k8s.io/cluster-name: test-1

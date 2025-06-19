@@ -85,4 +85,3 @@ spec:
       key: Prefix_For_Net_ipv4
       kind: IPPool
       name: netpool-ipv4-test-1
-  templateReference: test-1-workers

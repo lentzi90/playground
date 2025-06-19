@@ -7,7 +7,6 @@ NUM_BMH=${NUM_BMH:-"5"}
 
 kind delete cluster
 
-docker rm -f dnsmasq
 docker rm -f image-server-e2e
 docker rm -f sushy-tools
 
