@@ -1,0 +1,55 @@
+apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+kind: KubeadmControlPlane
+metadata:
+  name: metal3-k8s
+  namespace: default
+spec:
+  machineTemplate:
+    infrastructureRef:
+      apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+      kind: Metal3MachineTemplate
+      name: metal3-k8s-controlplane-plain
+      namespace: default
+    nodeDrainTimeout: "0s"
+  replicas: 1
+  rolloutStrategy:
+    rollingUpdate:
+      maxSurge: 1
+    type: RollingUpdate
+  version: v1.33.0
+  kubeadmConfigSpec:
+    # files:
+    # - contentFrom:
+    #     secret:
+    #       key: ubuntu-install-k8s-release-artifacts.sh
+    #       name: install-k8s
+    #   path: /tmp/install-k8s.sh
+    #   owner: root:root
+    #   permissions: '0755'
+    preKubeadmCommands:
+    - echo "127.0.1.1 {{ ds.meta_data.name }}" >> /etc/hosts
+    # - /tmp/install-k8s.sh
+    - systemctl enable --now crio
+    - systemctl enable --now kubelet
+    joinConfiguration:
+      controlPlane: {}
+      nodeRegistration:
+        name: '{{ ds.meta_data.name }}'
+        kubeletExtraArgs:
+          node-labels: 'metal3.io/uuid={{ ds.meta_data.uuid }}'
+          rotate-server-certificates: "true"
+          rotate-certificates: "true"
+          container-runtime-endpoint: 'unix:///var/run/crio/crio.sock'
+    initConfiguration:
+      nodeRegistration:
+        name: '{{ ds.meta_data.name }}'
+        kubeletExtraArgs:
+          node-labels: 'metal3.io/uuid={{ ds.meta_data.uuid }}'
+          rotate-server-certificates: "true"
+          rotate-certificates: "true"
+          container-runtime-endpoint: 'unix:///var/run/crio/crio.sock'
+    users:
+    - name: cenots
+      sudo: 'ALL=(ALL) NOPASSWD:ALL'
+      sshAuthorizedKeys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOxg0/L9LWM8K6//pe5OYc7SK4vv6676uz6VRJGA44nl lennart

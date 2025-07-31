@@ -291,6 +291,8 @@ kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisione
 kubectl patch storageclass local-path -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 
 # Install kamaji
+# NOTE: To get a specific version, checkout the repo at the desired tag and use the helm chart from there.
+# Replace the image.tag with the desired version.
 helm repo add clastix https://clastix.github.io/charts
 helm repo update
 helm install kamaji clastix/kamaji \
@@ -306,9 +308,6 @@ kubectl apply -k Metal3/kamaji
 # The above has a hard-coded API endpoint and cluster name.
 # Another cluster can be created by changing these.
 kustomize build Metal3/kamaji | sed -e "s/kamaji-1/kamaji-2/g" -e "s/192.168.222.150/192.168.222.160/g" | kubectl apply -f -
-
-# TODO: Had to manually patch the kamaji control-plane as it got stuck waiting for the API endpoint.
-# Just change the number of replicas.
 
 # Get the workload cluster kubeconfig
 clusterctl get kubeconfig kamaji-1 > hosted.yaml

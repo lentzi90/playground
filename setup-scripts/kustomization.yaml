@@ -7,5 +7,6 @@ secretGenerator:
   - ubuntu-install-k8s.sh
   - ubuntu-sysext-k8s.sh
   - ubuntu-install-k8s-release-artifacts.sh
+  - centos-install-k8s-release-artifacts.sh
   name: install-k8s
   namespace: default
