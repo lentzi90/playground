@@ -16,6 +16,7 @@ tmp
 
 Metal3/images
 disk-images
+Metal3/BML/inventory
 
 ironic-auth-config
 ironic-inspector-auth-config
