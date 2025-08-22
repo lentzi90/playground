@@ -1,5 +1,4 @@
----
-apiVersion: addons.cluster.x-k8s.io/v1beta1
+apiVersion: addons.cluster.x-k8s.io/v1beta2
 kind: ClusterResourceSet
 metadata:
   name: cloud-provider-openstack
@@ -10,7 +9,7 @@ spec:
     matchLabels:
       cloud: openstack
   resources:
-    - name: cloud-provider-openstack
-      kind: ConfigMap
-    - name: cloud-config
-      kind: Secret
+  - name: cloud-provider-openstack
+    kind: ConfigMap
+  - name: cloud-config
+    kind: Secret

@@ -7,7 +7,7 @@ spec:
   nodeReuse: false
   template:
     spec:
-      automatedCleaningMode: disabled
+      automatedCleaningMode: metadata
       hostSelector:
         matchLabels:
           # bmh-name: eselda13u31s04

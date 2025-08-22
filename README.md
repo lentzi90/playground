@@ -36,7 +36,7 @@ kubectl -n kube-system create secret generic cloud-config \
 Apply the ClusterResourceSets:
 
 ```bash
-kubectl apply -k ClusterResourceSets
+kubectl apply --server-side -k ClusterResourceSets
 ```
 
 Any cluster with the label `cni=calico` will automatically get Calico deployed and any cluster with the label `cloud=openstack` will automatically get the OpenStack cloud provider deployed now.
@@ -165,7 +165,7 @@ qemu-img convert -f qcow2 -O raw Metal3/images/ubuntu-2404.img Metal3/images/ubu
 # Create BMHs backed by VMs
 NUM_BMH=5 ./Metal3/create-bmhs.sh
 # (Optional) Apply ClusterResourceSets
-kubectl apply -k ClusterResourceSets
+kubectl apply --server-side -k ClusterResourceSets
 # Apply setup-scripts for installing k8s on plain images
 kubectl apply -k setup-scripts
 # Apply cluster
@@ -185,7 +185,7 @@ kubectl --kubeconfig=kubeconfig.yaml apply -k ClusterResourceSets/calico
 
 ```bash
 # (Optional) Apply ClusterResourceSets
-kubectl apply -k ClusterResourceSets
+kubectl apply --server-side -k ClusterResourceSets
 # Apply ClusterClass
 kubectl apply -k ClusterClasses/metal3-class
 # Create Cluster

@@ -1,7 +1,7 @@
 apiVersion: cluster.x-k8s.io/v1beta1
 kind: MachineDeployment
 metadata:
-  name: md-kamaji-metal3
+  name: kamaji-metal3
   namespace: default
   labels:
     cluster.x-k8s.io/cluster-name: kamaji-metal3

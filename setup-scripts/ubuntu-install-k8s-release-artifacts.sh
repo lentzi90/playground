@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-KUBERNETES_VERSION="${KUBERNETES_VERSION:-v1.33.1}"
+KUBERNETES_VERSION="${KUBERNETES_VERSION:-v1.33.4}"
 # KUBERNETES_VERSION="$(curl -sSL https://dl.k8s.io/release/stable.txt)"
 
 # Kubernetes release tooling
