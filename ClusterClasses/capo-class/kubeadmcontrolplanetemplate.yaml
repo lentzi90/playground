@@ -1,4 +1,4 @@
-apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+apiVersion: controlplane.cluster.x-k8s.io/v1beta2
 kind: KubeadmControlPlaneTemplate
 metadata:
   name: lennart-openstack-v0.1.0
@@ -9,16 +9,21 @@ spec:
         clusterConfiguration:
           controllerManager:
             extraArgs:
-              cloud-provider: external
+            - name: cloud-provider
+              value: external
         initConfiguration:
           nodeRegistration:
             kubeletExtraArgs:
-              cloud-provider: external
-              provider-id: "openstack:///'{{ v1.instance_id }}'"
+            - name: cloud-provider
+              value: external
+            - name: provider-id
+              value: "openstack:///'{{ v1.instance_id }}'"
             name: '{{ v1.local_hostname }}'
         joinConfiguration:
           nodeRegistration:
             kubeletExtraArgs:
-              cloud-provider: external
-              provider-id: "openstack:///'{{ v1.instance_id }}'"
+            - name: cloud-provider
+              value: external
+            - name: provider-id
+              value: "openstack:///'{{ v1.instance_id }}'"
             name: '{{ v1.local_hostname }}'

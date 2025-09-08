@@ -1,4 +1,4 @@
-apiVersion: cluster.x-k8s.io/v1beta1
+apiVersion: cluster.x-k8s.io/v1beta2
 kind: Cluster
 metadata:
   name: lennart-workload
@@ -7,8 +7,10 @@ metadata:
     cloud: openstack
 spec:
   topology:
-    class: lennart-openstack-v0.1.0
-    version: v1.33.0
+    classRef:
+      name: lennart-openstack-v0.1.0
+      namespace: default
+    version: v1.34.0
     variables:
     - name: identityRef
       value:
@@ -33,7 +35,7 @@ spec:
     - name: allowedCIDRs
       value:
       - 10.6.0.0/24
-      - 91.150.26.243/32
+      - 85.134.18.87/32
     workers:
       machineDeployments:
       - class: default-worker
