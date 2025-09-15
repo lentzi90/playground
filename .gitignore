@@ -11,6 +11,10 @@ hmac-token
 capi-visualizer/charts
 output.yaml
 tmp
+.env
+.terraform
+*.tfstate
+*.tfstate.backup
 
 .venv
 

@@ -5,13 +5,13 @@ metadata:
 spec:
   controlPlane:
     templateRef:
-      apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+      apiVersion: controlplane.cluster.x-k8s.io/v1beta2
       kind: KubeadmControlPlaneTemplate
       name: lennart-openstack-v0.1.0
     machineInfrastructure:
       templateRef:
-        kind: OpenStackMachineTemplate
         apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        kind: OpenStackMachineTemplate
         name: lennart-openstack-v0.1.0
   infrastructure:
     templateRef:
@@ -23,7 +23,7 @@ spec:
     - class: default-worker
       bootstrap:
         templateRef:
-          apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+          apiVersion: bootstrap.cluster.x-k8s.io/v1beta2
           kind: KubeadmConfigTemplate
           name: lennart-openstack-v0.1.0-default-worker
       infrastructure:
@@ -197,7 +197,7 @@ spec:
     enabledIf: "{{ .injectSetupScripts }}"
     definitions:
     - selector:
-        apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+        apiVersion: controlplane.cluster.x-k8s.io/v1beta2
         kind: KubeadmControlPlaneTemplate
         matchResources:
           controlPlane: true
@@ -208,7 +208,7 @@ spec:
           template: |
             - KUBERNETES_VERSION={{ .builtin.controlPlane.version }} /tmp/install-k8s.sh
     - selector:
-        apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+        apiVersion: controlplane.cluster.x-k8s.io/v1beta2
         kind: KubeadmControlPlaneTemplate
         matchResources:
           controlPlane: true
@@ -225,7 +225,7 @@ spec:
               owner: root:root
               permissions: '0755'
     - selector:
-        apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+        apiVersion: bootstrap.cluster.x-k8s.io/v1beta2
         kind: KubeadmConfigTemplate
         matchResources:
           machineDeploymentClass:
@@ -244,7 +244,7 @@ spec:
               owner: root:root
               permissions: '0755'
     - selector:
-        apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+        apiVersion: bootstrap.cluster.x-k8s.io/v1beta2
         kind: KubeadmConfigTemplate
         matchResources:
           machineDeploymentClass:
