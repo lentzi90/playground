@@ -1,0 +1,145 @@
+nodes:
+  # Cluster API resources
+  Cluster/cluster.x-k8s.io/v1beta1:
+    scope: Namespaced
+    edges: |
+      edges.add_owned_resources()
+      edges.add_resource("spec.infrastructureRef")
+      edges.add_resource("spec.controlPlaneRef")
+  Cluster/cluster.x-k8s.io/v1beta2:
+    scope: Namespaced
+    edges: |
+      edges.add_owned_resources()
+      # edges.add_resource("spec.infrastructureRef")
+      # edges.add_resource("spec.controlPlaneRef")
+  KubeadmControlPlane/controlplane.cluster.x-k8s.io/v1beta2:
+    scope: Namespaced
+    edges: |
+      edges.add_owned_resources()
+      # edges.add_resource("spec.machineTemplate.infrastructureRef")
+  KubeadmControlPlane/controlplane.cluster.x-k8s.io/v1beta1: KubeadmControlPlane/controlplane.cluster.x-k8s.io/v1beta2
+  MachineDeployment/cluster.x-k8s.io/v1beta1:
+    scope: Namespaced
+    edges: |
+      edges.add_owned_resources()
+      edges.add_resource("spec.template.spec.bootstrap.configRef")
+      edges.add_resource("spec.template.spec.infrastructureRef")
+      edges.add_edge_to(
+          path="spec.clusterName",
+          name=resource["spec"].get("clusterName"),
+          namespace=resource["metadata"].get("namespace"),
+          kind="Cluster",
+          api_version="cluster.x-k8s.io/v1beta2",
+          edge_kind="REFERENCE-UP"
+      )
+  # MachineDeployment/cluster.x-k8s.io/v1beta1: MachineDeployment/cluster.x-k8s.io/v1beta2
+  KubeadmConfigTemplate/bootstrap.cluster.x-k8s.io/v1beta2:
+    scope: Namespaced
+    edges: |
+      edges.add_owned_resources()
+  KubeadmConfigTemplate/bootstrap.cluster.x-k8s.io/v1beta1: KubeadmConfigTemplate/bootstrap.cluster.x-k8s.io/v1beta2
+  Machine/cluster.x-k8s.io/v1beta2:
+    scope: Namespaced
+    edges: |
+      edges.add_owned_resources()
+      edges.add_resource("spec.bootstrap.configRef")
+      edges.add_resource("spec.infrastructureRef")
+      edges.add_edge_to(
+          path="spec.clusterName",
+          name=resource["spec"].get("clusterName"),
+          namespace=resource["metadata"].get("namespace"),
+          kind="Cluster",
+          api_version="cluster.x-k8s.io/v1beta1",
+          edge_kind="REFERENCE-UP"
+      )
+  Machine/cluster.x-k8s.io/v1beta1: Machine/cluster.x-k8s.io/v1beta2
+  KubeadmConfig/bootstrap.cluster.x-k8s.io/v1beta2:
+    scope: Namespaced
+    edges: |
+      edges.add_owned_resources()
+  KubeadmConfig/bootstrap.cluster.x-k8s.io/v1beta1: KubeadmConfig/bootstrap.cluster.x-k8s.io/v1beta2
+  # Kamaji specific resources
+  KamajiControlPlane/controlplane.cluster.x-k8s.io/v1alpha1:
+    scope: Namespaced
+    edges: |
+      edges.add_owned_resources()
+  # CAPO specific resources
+  OpenStackCluster/infrastructure.cluster.x-k8s.io/v1beta1:
+    scope: Namespaced
+    edges: |
+      edges.add_owned_resources()
+  OpenStackMachineTemplate/infrastructure.cluster.x-k8s.io/v1beta1:
+    scope: Namespaced
+    edges: |
+      edges.add_owned_resources()
+      edges.add_edge_to(
+          path="spec.template.spec.dataTemplate.name",
+          name=".",
+          namespace=resource["metadata"].get("namespace"),
+          kind="Metal3DataTemplate",
+          api_version="infrastructure.cluster.x-k8s.io/v1beta1",
+          edge_kind="REFERENCE"
+      )
+  OpenStackMachine/infrastructure.cluster.x-k8s.io/v1beta1:
+    scope: Namespaced
+    edges: |
+      edges.add_owned_resources()
+  # Metal3 specific resources
+  Metal3Cluster/infrastructure.cluster.x-k8s.io/v1beta1:
+    scope: Namespaced
+    edges: |
+      edges.add_owned_resources()
+  Metal3MachineTemplate/infrastructure.cluster.x-k8s.io/v1beta1:
+    scope: Namespaced
+    edges: |
+      edges.add_owned_resources()
+      edges.add_edge_to(
+          path="spec.template.spec.dataTemplate.name",
+          name=".",
+          namespace=resource["metadata"].get("namespace"),
+          kind="Metal3DataTemplate",
+          api_version="infrastructure.cluster.x-k8s.io/v1beta1",
+          edge_kind="REFERENCE"
+      )
+  Metal3DataTemplate/infrastructure.cluster.x-k8s.io/v1beta1:
+    scope: Namespaced
+    edges: |
+      edges.add_owned_resources()
+      # clusterName should be removed...
+      edges.add_edge_to(
+          path="spec.clusterName",
+          name=resource["spec"].get("clusterName"),
+          namespace=resource["metadata"].get("namespace"),
+          kind="Cluster",
+          api_version="cluster.x-k8s.io/v1beta1",
+          edge_kind="REFERENCE-UP"
+      )
+      for pool in ["prefixesFromIPPool", "gatewaysFromIPPool", "ipAddressesFromIPPool"]:
+          if pool in resource["spec"]:
+              for entry in resource["spec"][pool]:
+                edges.add_edge_to(
+                    path=f"spec.metaData.{pool}[]",
+                    name=entry.get("name"),
+                    namespace=resource["metadata"].get("namespace"),
+                    kind="IPPool",
+                    api_version="ipam.metal3.io/v1alpha1",
+                    edge_kind="REFERENCE"
+                )
+  IPPool/ipam.metal3.io/v1alpha1:
+    scope: Namespaced
+    edges: |
+      # clusterName should be removed...
+      edges.add_edge_to(
+          path="spec.clusterName",
+          name=resource["spec"].get("clusterName"),
+          namespace=resource["metadata"].get("namespace"),
+          kind="Cluster",
+          api_version="cluster.x-k8s.io/v1beta1",
+          edge_kind="REFERENCE-UP"
+      )
+  Metal3Machine/infrastructure.cluster.x-k8s.io/v1beta1:
+    scope: Namespaced
+    edges: |
+      edges.add_owned_resources()
+  BareMetalHost/metal3.io/v1alpha1:
+    scope: Namespaced
