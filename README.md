@@ -80,6 +80,26 @@ kubectl apply -f CAPO/cluster.yaml
 kubectl apply -k CAPO/test-cluster
 ```
 
+### CAPO upstream ClusterClass
+
+Create a cluster using the upstream ClusterClass and image template.
+
+```bash
+# Set variables
+source CAPO/.env
+# Apply the clusterclass
+clusterctl generate yaml --from https://github.com/kubernetes-sigs/cluster-api-provider-openstack/releases/latest/download/clusterclass-dev-test.yaml | kubectl apply -f -
+# If the openstack cloud does not support qcow2, download the image and convert.
+wget https://stable.release.flatcar-linux.net/amd64-usr/current/flatcar_production_openstack_image.img
+qemu-img convert -f qcow2 -O raw flatcar_production_openstack_image.img flatcar_production.raw
+openstack image create --file flatcar_production.raw flatcar_production
+# Now we can apply the image template. It will pick up the existing image, or download as needed.
+kubectl apply -f https://github.com/kubernetes-sigs/cluster-api-provider-openstack/releases/latest/download/image-template-node.yaml
+
+# Create a cluster
+clusterctl generate cluster lennart-test --kubernetes-version=v1.33.4 --flavor=dev-test | kubectl apply -f -
+```
+
 ### CNI and external cloud provider
 
 Apply manually if you did not use the ClusterResourceSets.
