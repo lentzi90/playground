@@ -12,8 +12,6 @@ kind create cluster
 kubectl apply -f "https://github.com/k-orc/openstack-resource-controller/releases/latest/download/install.yaml"
 # If you want to use ClusterClasses
 export CLUSTER_TOPOLOGY=true
-# If you want to use ClusterResourceSets
-export EXP_CLUSTER_RESOURCE_SET=true
 # If you want to use ignition
 export EXP_KUBEADM_BOOTSTRAP_FORMAT_IGNITION=true
 clusterctl init --infrastructure=openstack
