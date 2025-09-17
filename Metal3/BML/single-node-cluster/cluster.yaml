@@ -2,7 +2,6 @@ apiVersion: cluster.x-k8s.io/v1beta1
 kind: Cluster
 metadata:
   name: metal3-k8s
-  namespace: default
   labels:
     cni: calico
 spec:
@@ -17,9 +16,7 @@ spec:
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: Metal3Cluster
     name: metal3-k8s
-    namespace: default
   controlPlaneRef:
     kind: KubeadmControlPlane
     apiVersion: controlplane.cluster.x-k8s.io/v1beta1
     name: metal3-k8s
-    namespace: default

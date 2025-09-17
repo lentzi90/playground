@@ -2,16 +2,16 @@ apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: Metal3MachineTemplate
 metadata:
   name: metal3-k8s-controlplane-plain
-  namespace: default
 spec:
   nodeReuse: false
   template:
     spec:
       hostSelector:
         matchLabels:
+          pool: lennart-centos
           # bmh-name: eselda13u31s04
           # bmh-name: eselda13u31s06
-          bmh-name: eselda13u31s14
+          # bmh-name: eselda13u31s14
           # bmh-name: eseldb12u11
       automatedCleaningMode: metadata
       dataTemplate:
