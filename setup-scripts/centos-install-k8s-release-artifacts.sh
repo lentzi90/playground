@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-KUBERNETES_VERSION="${KUBERNETES_VERSION:-v1.33.1}"
+KUBERNETES_VERSION="${KUBERNETES_VERSION:-v1.34.1}"
 # KUBERNETES_VERSION="$(curl -sSL https://dl.k8s.io/release/stable.txt)"
 
 # Kubernetes release tooling
@@ -8,12 +8,12 @@ KUBERNETES_VERSION="${KUBERNETES_VERSION:-v1.33.1}"
 RELEASE_VERSION="${RELEASE_VERSION:-v0.18.0}"
 
 # https://github.com/kubernetes-sigs/cri-tools/releases
-CRICTL_VERSION="v1.33.0"
+CRICTL_VERSION="v1.34.0"
 
 # https://github.com/containernetworking/plugins/releases
-CNI_PLUGINS_VERSION="v1.7.1"
+CNI_PLUGINS_VERSION="v1.8.0"
 
-CRIO_VERSION=v1.33
+CRIO_VERSION=v1.34
 
 ARCH=$(uname -m)
 

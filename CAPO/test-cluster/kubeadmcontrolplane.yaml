@@ -42,4 +42,4 @@ spec:
         kind: OpenStackMachineTemplate
         name: lennart-test-plain
   replicas: 1
-  version: v1.33.4
+  version: v1.34.1

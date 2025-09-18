@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-KUBERNETES_MINOR_VERSION=v1.33
+KUBERNETES_MINOR_VERSION=v1.34
 
 # Update system
 sudo apt-get update && sudo apt-get upgrade -y
