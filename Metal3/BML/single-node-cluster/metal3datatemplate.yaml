@@ -48,11 +48,10 @@ spec:
       - 8.8.8.8
       - 1.1.1.1
   metaData:
+    strings:
+    - key: vip
+      value: 192.168.0.151
     ipAddressesFromIPPool:
-    - apiGroup: ipam.metal3.io
-      key: vip
-      kind: IPPool
-      name: control-plane-endpoint-metal3-k8s
     - apiGroup: ipam.metal3.io
       key: internal_ip
       kind: IPPool

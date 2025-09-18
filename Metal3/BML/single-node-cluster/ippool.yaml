@@ -1,19 +1,6 @@
 apiVersion: ipam.metal3.io/v1alpha1
 kind: IPPool
 metadata:
-  name: control-plane-endpoint-metal3-k8s
-spec:
-  clusterName: metal3-k8s
-  gateway: 192.168.0.1
-  namePrefix: kcp
-  pools:
-  - end: 192.168.0.151
-    start: 192.168.0.151
-    prefix: 24
----
-apiVersion: ipam.metal3.io/v1alpha1
-kind: IPPool
-metadata:
   name: internal-ipv4-metal3-k8s
 spec:
   clusterName: metal3-k8s

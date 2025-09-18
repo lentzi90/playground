@@ -7,14 +7,16 @@ spec:
     infrastructureRef:
       apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
       kind: Metal3MachineTemplate
-      name: metal3-k8s-controlplane-plain
+      name: metal3-k8s-controlplane-v1.34.0
+      # name: metal3-k8s-controlplane-v1.33.0
     nodeDrainTimeout: "0s"
   replicas: 1
   rolloutStrategy:
     rollingUpdate:
       maxSurge: 1
     type: RollingUpdate
-  version: v1.33.0
+  version: v1.34.0
+  # version: v1.33.0
   kubeadmConfigSpec:
     files:
     - path: /etc/kubernetes/manifests/kube-vip.yaml
@@ -110,8 +112,6 @@ spec:
         name: '{{ ds.meta_data.name }}'
         kubeletExtraArgs:
           node-labels: 'metal3.io/uuid={{ ds.meta_data.uuid }}'
-          rotate-server-certificates: "true"
-          rotate-certificates: "true"
           container-runtime-endpoint: 'unix:///var/run/crio/crio.sock'
     initConfiguration:
       localAPIEndpoint:
@@ -120,13 +120,11 @@ spec:
         name: '{{ ds.meta_data.name }}'
         kubeletExtraArgs:
           node-labels: 'metal3.io/uuid={{ ds.meta_data.uuid }}'
-          rotate-server-certificates: "true"
-          rotate-certificates: "true"
           container-runtime-endpoint: 'unix:///var/run/crio/crio.sock'
     clusterConfiguration:
       controlPlaneEndpoint: '{{ ds.meta_data.vip }}:6443'
     users:
-    - name: cenots
+    - name: centos
       sudo: 'ALL=(ALL) NOPASSWD:ALL'
       sshAuthorizedKeys:
       - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOxg0/L9LWM8K6//pe5OYc7SK4vv6676uz6VRJGA44nl lennart

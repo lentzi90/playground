@@ -1,7 +1,7 @@
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: Metal3MachineTemplate
 metadata:
-  name: metal3-k8s-controlplane-plain
+  name: metal3-k8s-controlplane-v1.33.0
 spec:
   nodeReuse: false
   template:
