@@ -34,15 +34,15 @@ spec:
         name: '{{ ds.meta_data.name }}'
         kubeletExtraArgs:
           node-labels: 'metal3.io/uuid={{ ds.meta_data.uuid }}'
-          rotate-server-certificates: "true"
-          rotate-certificates: "true"
+          # rotate-server-certificates: "true"
+          # rotate-certificates: "true"
     initConfiguration:
       nodeRegistration:
         name: '{{ ds.meta_data.name }}'
         kubeletExtraArgs:
           node-labels: 'metal3.io/uuid={{ ds.meta_data.uuid }}'
-          rotate-server-certificates: "true"
-          rotate-certificates: "true"
+          # rotate-server-certificates: "true"
+          # rotate-certificates: "true"
           # max-pods: "500"
           # system-reserved: cpu=100m
           # reserved-cpus: "0"

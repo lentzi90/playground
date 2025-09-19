@@ -1,0 +1,123 @@
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  name: kamaji-kubevirt
+  namespace: default
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+      - 10.243.0.0/16
+    services:
+      cidrBlocks:
+      - 10.95.0.0/16
+  controlPlaneRef:
+    apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+    kind: KamajiControlPlane
+    name: kamaji-kubevirt
+    namespace: default
+  infrastructureRef:
+    apiVersion: infrastructure.cluster.x-k8s.io/v1alpha1
+    kind: KubevirtCluster
+    name: kamaji-kubevirt
+    namespace: default
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1alpha1
+kind: KubevirtCluster
+metadata:
+  name: kamaji-kubevirt
+  namespace: default
+spec:
+  controlPlaneEndpoint:
+    host: 192.168.0.150
+    port: 6443
+---
+apiVersion: controlplane.cluster.x-k8s.io/v1alpha1
+kind: KamajiControlPlane
+metadata:
+  name: kamaji-kubevirt
+spec:
+  dataStoreName: default
+  dataStoreSchema: kamaji-kubevirt
+  kubelet:
+    cgroupfs: systemd
+    preferredAddressTypes:
+    - ExternalIP
+    - InternalIP
+    - Hostname
+  addons:
+    coreDNS: {}
+    kubeProxy: {}
+  network:
+    serviceType: LoadBalancer
+    serviceAnnotations:
+      metallb.io/loadBalancerIPs: "192.168.0.150"
+  deployment:
+  replicas: 2
+  version: 1.32.1
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1alpha1
+kind: KubevirtMachineTemplate
+metadata:
+  name: kamaji-kubevirt-md-0
+  namespace: default
+spec:
+  template:
+    spec:
+      virtualMachineBootstrapCheck:
+        checkStrategy: ssh
+      virtualMachineTemplate:
+        metadata:
+          namespace: default
+        spec:
+          runStrategy: Always
+          template:
+            spec:
+              domain:
+                cpu:
+                  cores: 2
+                devices:
+                  disks:
+                  - disk:
+                      bus: virtio
+                    name: containervolume
+                  networkInterfaceMultiqueue: true
+                memory:
+                  guest: 4Gi
+              evictionStrategy: External
+              volumes:
+              - containerDisk:
+                  image: quay.io/capk/ubuntu-2404-container-disk:v1.32.1
+                name: containervolume
+---
+apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+kind: KubeadmConfigTemplate
+metadata:
+  name: kamaji-kubevirt-md-0
+  namespace: default
+---
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: MachineDeployment
+metadata:
+  name: kamaji-kubevirt-md-0
+  namespace: default
+spec:
+  clusterName: kamaji-kubevirt
+  replicas: 1
+  selector:
+    matchLabels: null
+  template:
+    spec:
+      bootstrap:
+        configRef:
+          apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+          kind: KubeadmConfigTemplate
+          name: kamaji-kubevirt-md-0
+          namespace: default
+      clusterName: kamaji-kubevirt
+      infrastructureRef:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1alpha1
+        kind: KubevirtMachineTemplate
+        name: kamaji-kubevirt-md-0
+        namespace: default
+      version: v1.32.1

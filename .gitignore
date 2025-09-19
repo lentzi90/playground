@@ -2,6 +2,7 @@ clouds.yaml
 cloud.conf
 cloud-config-secret.yaml
 *kubeconfig.yaml
+*.kubeconfig
 .s3cfg
 s3-credentials.json
 service-account.json
