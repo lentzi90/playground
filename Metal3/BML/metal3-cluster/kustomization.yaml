@@ -5,6 +5,8 @@ resources:
 - cluster.yaml
 - metal3cluster.yaml
 - kcp.yaml
+- kct.yaml
+- machinedeployment.yaml
 - metal3machinetemplate-v1.33.0.yaml
 - metal3machinetemplate-v1.34.0.yaml
 - metal3datatemplate.yaml

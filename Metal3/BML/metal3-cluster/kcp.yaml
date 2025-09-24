@@ -113,6 +113,7 @@ spec:
         kubeletExtraArgs:
           node-labels: 'metal3.io/uuid={{ ds.meta_data.uuid }}'
           container-runtime-endpoint: 'unix:///var/run/crio/crio.sock'
+          node-ip: '{{ ds.meta_data.internal_ip }}'
     initConfiguration:
       localAPIEndpoint:
         advertiseAddress: '{{ ds.meta_data.internal_ip }}'
@@ -121,6 +122,7 @@ spec:
         kubeletExtraArgs:
           node-labels: 'metal3.io/uuid={{ ds.meta_data.uuid }}'
           container-runtime-endpoint: 'unix:///var/run/crio/crio.sock'
+          node-ip: '{{ ds.meta_data.internal_ip }}'
     clusterConfiguration:
       controlPlaneEndpoint: '{{ ds.meta_data.vip }}:6443'
     users:

@@ -1,0 +1,23 @@
+apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+kind: KubeadmConfigTemplate
+metadata:
+  name: metal3-k8s-workers
+spec:
+  template:
+    spec:
+      preKubeadmCommands:
+      - echo "127.0.1.1 {{ ds.meta_data.name }}" >> /etc/hosts
+      - systemctl enable --now crio
+      - systemctl enable --now kubelet
+      joinConfiguration:
+        nodeRegistration:
+          name: '{{ ds.meta_data.name }}'
+          kubeletExtraArgs:
+            node-labels: 'metal3.io/uuid={{ ds.meta_data.uuid }}'
+            container-runtime-endpoint: 'unix:///var/run/crio/crio.sock'
+            node-ip: '{{ ds.meta_data.internal_ip }}'
+      users:
+      - name: centos
+        sudo: 'ALL=(ALL) NOPASSWD:ALL'
+        sshAuthorizedKeys:
+        - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOxg0/L9LWM8K6//pe5OYc7SK4vv6676uz6VRJGA44nl lennart
