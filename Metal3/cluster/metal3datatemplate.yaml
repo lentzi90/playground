@@ -6,19 +6,22 @@ metadata:
 spec:
   clusterName: test-1
   metaData:
+    strings:
+    - key: vip
+      value: 192.168.222.200
     gatewaysFromIPPool:
     - apiGroup: ipam.metal3.io
       key: Gateway_For_Net_ipv4
       kind: IPPool
-      name: control-plane-endpoint-test-1
+      name: netpool-ipv4-test-1
     indexes:
     - key: machine_index
       step: 1
     ipAddressesFromIPPool:
     - apiGroup: ipam.metal3.io
-      key: IP_For_Net_ipv4
+      key: internal_ip
       kind: IPPool
-      name: control-plane-endpoint-test-1
+      name: netpool-ipv4-test-1
     objectNames:
     - key: machine_name
       object: machine
@@ -30,27 +33,27 @@ spec:
     - apiGroup: ipam.metal3.io
       key: Prefix_For_Net_ipv4
       kind: IPPool
-      name: control-plane-endpoint-test-1
-  # networkData:
-  #   links:
-  #     ethernets:
-  #       - type: phy
-  #         id: enp1s0
-  #         macAddress:
-  #           fromHostInterface: enp1s0
-  #   networks:
-  #     ipv4:
-  #       - id: kcpv4
-  #         link: enp1s0
-  #         ipAddressFromIPPool: control-plane-endpoint-test-1
-  #         routes:
-  #           - network: 0.0.0.0
-  #             prefix: 0
-  #             gateway:
-  #               fromIPPool: control-plane-endpoint-test-1
-  #   services:
-  #     dns:
-  #       - 8.8.8.8
+      name: netpool-ipv4-test-1
+      # networkData:
+      #   links:
+      #     ethernets:
+      #       - type: phy
+      #         id: enp1s0
+      #         macAddress:
+      #           fromHostInterface: enp1s0
+      #   networks:
+      #     ipv4:
+      #       - id: kcpv4
+      #         link: enp1s0
+      #         ipAddressFromIPPool: control-plane-endpoint-test-1
+      #         routes:
+      #           - network: 0.0.0.0
+      #             prefix: 0
+      #             gateway:
+      #               fromIPPool: control-plane-endpoint-test-1
+      #   services:
+      #     dns:
+      #       - 8.8.8.8
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: Metal3DataTemplate
@@ -70,7 +73,7 @@ spec:
       step: 1
     ipAddressesFromIPPool:
     - apiGroup: ipam.metal3.io
-      key: IP_For_Net_ipv4
+      key: internal_ip
       kind: IPPool
       name: netpool-ipv4-test-1
     objectNames:

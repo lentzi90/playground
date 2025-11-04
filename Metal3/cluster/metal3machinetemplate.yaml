@@ -7,9 +7,6 @@ spec:
   nodeReuse: false
   template:
     spec:
-      hostSelector:
-        matchLabels:
-          bmh-name: bmo-e2e-0
       automatedCleaningMode: metadata
       dataTemplate:
         name: test-1-controlplane-template
