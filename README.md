@@ -267,15 +267,15 @@ rm -r Metal3/tmp/bmhs
 
 ### K3s as bootstrap and control-plane provider
 
-Add the following to `${HOME}/.cluster-api/clusterctl.yaml`:
+Add the following to `${HOME}/.config/cluster-api/clusterctl.yaml`:
 
 ```yaml
 providers:
 - name: "k3s"
-  url: https://github.com/cluster-api-provider-k3s/cluster-api-k3s/releases/latest/bootstrap-components.yaml
+  url: https://github.com/cluster-api-provider-k3s/cluster-api-k3s/releases/latest/download/bootstrap-components.yaml
   type: "BootstrapProvider"
 - name: "k3s"
-  url: https://github.com/cluster-api-provider-k3s/cluster-api-k3s/releases/latest/control-plane-components.yaml
+  url: https://github.com/cluster-api-provider-k3s/cluster-api-k3s/releases/latest/download/control-plane-components.yaml
   type: "ControlPlaneProvider"
 ```
 
@@ -298,7 +298,7 @@ kubectl apply -k Metal3/k3s
 ```bash
 # Do a normal bootstrap cluster setup with Metal3 first.
 # Continue here after moving from the bootstrap to the management cluster.
-# Tested with v0.15.2
+# Tested with v0.15.4
 clusterctl init --control-plane kamaji
 # Install metallb (needed for Kamaji k8s API endpoints)
 kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.15.2/config/manifests/metallb-native.yaml

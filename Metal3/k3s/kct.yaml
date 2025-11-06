@@ -14,5 +14,5 @@ spec:
         - 'provider-id=metal3://{{ ds.meta_data.providerid }}'
       preK3sCommands:
       - mkdir -p /home/ubuntu/.ssh
-      - echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF3XsjgwkAkxd5aioPiBws7O5nx5ofcR4TvAIOvSQ9Ce lennart" > /home/ubuntu/.ssh/authorized_keys
-      version: v1.28.5+k3s1
+      - echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOxg0/L9LWM8K6//pe5OYc7SK4vv6676uz6VRJGA44nl lennart" > /home/ubuntu/.ssh/authorized_keys
+      version: v1.34.1+k3s1
