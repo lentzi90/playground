@@ -1,21 +1,21 @@
-apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+apiVersion: controlplane.cluster.x-k8s.io/v1beta2
 kind: KubeadmControlPlane
 metadata:
   name: test-1
   namespace: default
 spec:
   machineTemplate:
-    infrastructureRef:
-      apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
-      kind: Metal3MachineTemplate
-      name: test-1-controlplane-plain
-      namespace: default
-    nodeDrainTimeout: "0s"
+    spec:
+      infrastructureRef:
+        apiGroup: infrastructure.cluster.x-k8s.io
+        kind: Metal3MachineTemplate
+        name: test-1-controlplane-plain
   replicas: 1
-  rolloutStrategy:
-    rollingUpdate:
-      maxSurge: 1
-    type: RollingUpdate
+  rollout:
+    strategy:
+      rollingUpdate:
+        maxSurge: 1
+      type: RollingUpdate
   version: v1.34.1
   kubeadmConfigSpec:
     files:
@@ -106,20 +106,30 @@ spec:
       nodeRegistration:
         name: '{{ ds.meta_data.name }}'
         kubeletExtraArgs:
-          node-labels: 'metal3.io/uuid={{ ds.meta_data.uuid }}'
-          # rotate-server-certificates: "true"
-          # rotate-certificates: "true"
+        - name: node-labels
+          value: 'metal3.io/uuid={{ ds.meta_data.uuid }}'
+          # - name: rotate-server-certificates
+          #   value: "true"
+          # - name: rotate-certificates
+          #   value: "true"
     initConfiguration:
       nodeRegistration:
         name: '{{ ds.meta_data.name }}'
         kubeletExtraArgs:
-          node-labels: 'metal3.io/uuid={{ ds.meta_data.uuid }}'
-          # rotate-server-certificates: "true"
-          # rotate-certificates: "true"
-          # max-pods: "500"
-          # system-reserved: cpu=100m
-          # reserved-cpus: "0"
-          # cpu-manager-policy: static
+        - name: node-labels
+          value: 'metal3.io/uuid={{ ds.meta_data.uuid }}'
+          # - name: rotate-server-certificates
+          #   value: "true"
+          # - name: rotate-certificates
+          #   value: "true"
+          # - name: max-pods
+          #   value: "500"
+          # - name: system-reserved
+          #   value: cpu=100m
+          # - name: reserved-cpus
+          #   value: "0"
+          # - name: cpu-manager-policy
+          #   value: static
     users:
     - name: ubuntu
       sudo: 'ALL=(ALL) NOPASSWD:ALL'

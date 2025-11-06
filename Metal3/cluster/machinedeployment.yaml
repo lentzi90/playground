@@ -1,4 +1,4 @@
-apiVersion: cluster.x-k8s.io/v1beta1
+apiVersion: cluster.x-k8s.io/v1beta2
 kind: MachineDeployment
 metadata:
   name: md-test-1
@@ -13,26 +13,26 @@ spec:
     matchLabels:
       cluster.x-k8s.io/cluster-name: test-1
       nodepool: nodepool-0
-  strategy:
-    rollingUpdate:
-      maxSurge: 0
-      maxUnavailable: 1
-    type: RollingUpdate
+  rollout:
+    strategy:
+      rollingUpdate:
+        maxSurge: 0
+        maxUnavailable: 1
+      type: RollingUpdate
   template:
     metadata:
       labels:
         cluster.x-k8s.io/cluster-name: test-1
         nodepool: nodepool-0
     spec:
-      nodeDrainTimeout: "0s"
       clusterName: test-1
       version: v1.34.1
       bootstrap:
         configRef:
           name: test-1-workers
-          apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+          apiGroup: bootstrap.cluster.x-k8s.io
           kind: KubeadmConfigTemplate
       infrastructureRef:
         name: test-1-workers-plain
-        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        apiGroup: infrastructure.cluster.x-k8s.io
         kind: Metal3MachineTemplate
