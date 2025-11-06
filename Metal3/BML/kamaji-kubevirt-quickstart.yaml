@@ -1,8 +1,7 @@
-apiVersion: cluster.x-k8s.io/v1beta1
+apiVersion: cluster.x-k8s.io/v1beta2
 kind: Cluster
 metadata:
   name: kamaji-kubevirt
-  namespace: default
 spec:
   clusterNetwork:
     pods:
@@ -12,21 +11,18 @@ spec:
       cidrBlocks:
       - 10.95.0.0/16
   controlPlaneRef:
-    apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+    apiGroup: controlplane.cluster.x-k8s.io
     kind: KamajiControlPlane
     name: kamaji-kubevirt
-    namespace: default
   infrastructureRef:
-    apiVersion: infrastructure.cluster.x-k8s.io/v1alpha1
+    apiGroup: infrastructure.cluster.x-k8s.io
     kind: KubevirtCluster
     name: kamaji-kubevirt
-    namespace: default
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1alpha1
 kind: KubevirtCluster
 metadata:
   name: kamaji-kubevirt
-  namespace: default
 spec:
   controlPlaneEndpoint:
     host: 192.168.0.150
@@ -60,7 +56,6 @@ apiVersion: infrastructure.cluster.x-k8s.io/v1alpha1
 kind: KubevirtMachineTemplate
 metadata:
   name: kamaji-kubevirt-md-0
-  namespace: default
 spec:
   template:
     spec:
@@ -90,17 +85,15 @@ spec:
                   image: quay.io/capk/ubuntu-2404-container-disk:v1.32.1
                 name: containervolume
 ---
-apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+apiVersion: bootstrap.cluster.x-k8s.io/v1beta2
 kind: KubeadmConfigTemplate
 metadata:
   name: kamaji-kubevirt-md-0
-  namespace: default
 ---
-apiVersion: cluster.x-k8s.io/v1beta1
+apiVersion: cluster.x-k8s.io/v1beta2
 kind: MachineDeployment
 metadata:
   name: kamaji-kubevirt-md-0
-  namespace: default
 spec:
   clusterName: kamaji-kubevirt
   replicas: 1
@@ -110,14 +103,12 @@ spec:
     spec:
       bootstrap:
         configRef:
-          apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+          apiGroup: bootstrap.cluster.x-k8s.io
           kind: KubeadmConfigTemplate
           name: kamaji-kubevirt-md-0
-          namespace: default
       clusterName: kamaji-kubevirt
       infrastructureRef:
-        apiVersion: infrastructure.cluster.x-k8s.io/v1alpha1
+        apiGroup: infrastructure.cluster.x-k8s.io
         kind: KubevirtMachineTemplate
         name: kamaji-kubevirt-md-0
-        namespace: default
       version: v1.32.1

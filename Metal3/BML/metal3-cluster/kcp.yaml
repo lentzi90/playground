@@ -1,20 +1,21 @@
-apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+apiVersion: controlplane.cluster.x-k8s.io/v1beta2
 kind: KubeadmControlPlane
 metadata:
   name: metal3-k8s
 spec:
   machineTemplate:
-    infrastructureRef:
-      apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
-      kind: Metal3MachineTemplate
-      name: metal3-k8s-controlplane-v1.34.0
-      # name: metal3-k8s-controlplane-v1.33.0
-    nodeDrainTimeout: "0s"
+    spec:
+      infrastructureRef:
+        apiGroup: infrastructure.cluster.x-k8s.io
+        kind: Metal3MachineTemplate
+        name: metal3-k8s-controlplane-v1.34.0
+        # name: metal3-k8s-controlplane-v1.33.0
   replicas: 1
-  rolloutStrategy:
-    rollingUpdate:
-      maxSurge: 1
-    type: RollingUpdate
+  rollout:
+    strategy:
+      rollingUpdate:
+        maxSurge: 1
+      type: RollingUpdate
   version: v1.34.0
   # version: v1.33.0
   kubeadmConfigSpec:
@@ -111,18 +112,24 @@ spec:
       nodeRegistration:
         name: '{{ ds.meta_data.name }}'
         kubeletExtraArgs:
-          node-labels: 'metal3.io/uuid={{ ds.meta_data.uuid }}'
-          container-runtime-endpoint: 'unix:///var/run/crio/crio.sock'
-          node-ip: '{{ ds.meta_data.internal_ip }}'
+        - name: container-runtime-endpoint
+          value: 'unix:///var/run/crio/crio.sock'
+        - name: node-ip
+          value: '{{ ds.meta_data.internal_ip }}'
+        - name: node-labels
+          value: 'metal3.io/uuid={{ ds.meta_data.uuid }}'
     initConfiguration:
       localAPIEndpoint:
         advertiseAddress: '{{ ds.meta_data.internal_ip }}'
       nodeRegistration:
         name: '{{ ds.meta_data.name }}'
         kubeletExtraArgs:
-          node-labels: 'metal3.io/uuid={{ ds.meta_data.uuid }}'
-          container-runtime-endpoint: 'unix:///var/run/crio/crio.sock'
-          node-ip: '{{ ds.meta_data.internal_ip }}'
+        - name: container-runtime-endpoint
+          value: 'unix:///var/run/crio/crio.sock'
+        - name: node-ip
+          value: '{{ ds.meta_data.internal_ip }}'
+        - name: node-labels
+          value: 'metal3.io/uuid={{ ds.meta_data.uuid }}'
     clusterConfiguration:
       controlPlaneEndpoint: '{{ ds.meta_data.vip }}:6443'
     users:
