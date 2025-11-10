@@ -32,7 +32,7 @@ do
     --ram="${MEMORY}" \
     --vcpus="${CPUS}" \
     --disk size=25 \
-    --boot hd,network \
+    --boot uefi,hd,network \
     --import \
     --network network=baremetal-e2e,mac="${BOOT_MAC_ADDRESS}" \
     --noautoconsole \

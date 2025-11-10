@@ -13,7 +13,7 @@ docker rm -f sushy-tools
 for ((i=0; i<NUM_BMH; i++))
 do
   virsh -c qemu:///system destroy --domain "bmo-e2e-${i}"
-  virsh -c qemu:///system undefine --domain "bmo-e2e-${i}" --remove-all-storage
+  virsh -c qemu:///system undefine --domain "bmo-e2e-${i}" --remove-all-storage --nvram
 done
 
 virsh -c qemu:///system net-destroy baremetal-e2e
