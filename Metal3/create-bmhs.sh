@@ -10,7 +10,7 @@ REPO_ROOT=$(realpath "$(dirname "${BASH_SOURCE[0]}")/..")
 cd "${REPO_ROOT}" || exit 1
 
 echo "Waiting for ironic deployment to be available..."
-kubectl wait --for=condition=Available --timeout=300s deployment/ironic -n baremetal-operator-system
+kubectl wait --for=condition=Available --timeout=300s deployment/ironic-service -n baremetal-operator-system
 
 mkdir -p "${REPO_ROOT}/Metal3/tmp"
 
