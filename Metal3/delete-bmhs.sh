@@ -11,6 +11,8 @@ cd "${REPO_ROOT}" || exit 1
 for ((i=0; i<NUM_BMH; i++))
 do
   VM_NAME="bmo-e2e-${i}"
+  kubectl annotate bmh "${VM_NAME}" baremetalhost.metal3.io/detached="deleting-vm"
+  kubectl wait --for=jsonpath='{.status.operationalStatus}'=detached "bmh/${VM_NAME}"
   kubectl delete bmh "${VM_NAME}"
 done
 
@@ -21,5 +23,5 @@ do
   # Stop the VM if it's running
   virsh -c qemu:///system destroy --domain "${VM_NAME}"
   # Delete the VM and its storage
-  virsh -c qemu:///system undefine --domain "${VM_NAME}" --remove-all-storage
+  virsh -c qemu:///system undefine --domain "${VM_NAME}" --remove-all-storage --nvram
 done
