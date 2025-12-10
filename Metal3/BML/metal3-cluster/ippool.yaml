@@ -23,3 +23,16 @@ spec:
   - end: 10.20.0.249
     prefix: 24
     start: 10.20.0.200
+---
+apiVersion: ipam.metal3.io/v1alpha1
+kind: IPPool
+metadata:
+  name: oob-ipv4-metal3-k8s
+spec:
+  clusterName: metal3-k8s
+  gateway: 192.168.1.1
+  namePrefix: oob-ipv4
+  pools:
+  - end: 192.168.1.139
+    prefix: 24
+    start: 192.168.1.130

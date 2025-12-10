@@ -1,0 +1,27 @@
+apiVersion: ironic.metal3.io/v1alpha1
+kind: Ironic
+metadata:
+  name: ironic
+  namespace: baremetal-operator-system
+spec:
+  version: "29.0"
+  apiCredentialsName: "ironic-credentials"
+  networking:
+    dhcp:
+      rangeBegin: "192.168.0.200"
+      rangeEnd: "192.168.0.220"
+      networkCIDR: "192.168.0.0/24"
+      hosts:
+      - 80:c1:6e:7a:e8:10;e4:11:5b:95:7e:98;b4:b5:2f:6d:a9:d8;6c:3b:e5:b5:03:c8;9C:63:C0:AC:10:42;40:a6:b7:c9:74:bf
+      ignore:
+      - tag:!known
+    interface: "eno49"
+    ipAddress: "192.168.0.100"
+    ipAddressManager: "keepalived"
+    # externalIP: "192.168.1.130"
+  tls:
+    certificateName: ironic-cert
+    disableVirtualMediaTLS: true
+  # deployRamdisk:
+  #   sshKey: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOxg0/L9LWM8K6//pe5OYc7SK4vv6676uz6VRJGA44nl lennart.jern@est.tech"
+  #   extraKernelParams: "console=ttyS0"

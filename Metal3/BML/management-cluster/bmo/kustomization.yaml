@@ -13,14 +13,3 @@ configMapGenerator:
   behavior: create
   envs:
   - ironic.env
-
-# We cannot use suffix hashes since the kustomizations we build on
-# cannot be aware of what suffixes we add.
-generatorOptions:
-  disableNameSuffixHash: true
-
-secretGenerator:
-- name: ironic-credentials
-  files:
-  - username=ironic-username
-  - password=ironic-password

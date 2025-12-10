@@ -8,16 +8,15 @@ spec:
       infrastructureRef:
         apiGroup: infrastructure.cluster.x-k8s.io
         kind: Metal3MachineTemplate
-        name: metal3-k8s-controlplane-v1.34.0
-        # name: metal3-k8s-controlplane-v1.33.0
+        # name: metal3-k8s-v1.34.0
+        name: metal3-k8s-v1.34.1
   replicas: 1
   rollout:
     strategy:
       rollingUpdate:
         maxSurge: 1
       type: RollingUpdate
-  version: v1.34.0
-  # version: v1.33.0
+  version: v1.34.1
   kubeadmConfigSpec:
     files:
     - path: /etc/kubernetes/manifests/kube-vip.yaml
@@ -43,7 +42,7 @@ spec:
                 fieldRef:
                   fieldPath: spec.nodeName
             - name: vip_interface
-              value: eth0
+              value: {{ ds.meta_data.vip_interface }}
             - name: vip_subnet
               value: "32"
             - name: dns_mode
