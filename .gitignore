@@ -24,13 +24,12 @@ disk-images
 Metal3/BML/inventory
 
 ironic-auth-config
-ironic-inspector-auth-config
 ironic-htpasswd
-ironic-inspector-htpasswd
 ironic-password
 ironic-username
-ironic-inspector-password
-ironic-inspector-username
+username
+password
+htpasswd
 
 ClusterResourceSets/calico.yaml
 ClusterResourceSets/cloud-provider-openstack.yaml

@@ -19,7 +19,7 @@ This already has the CRI configured to allow block device imports.
 ## Deploy kubevirt
 
 ```bash
-# Tested with v1.5.0
+# Tested with v1.7.0
 export VERSION=$(curl -s https://storage.googleapis.com/kubevirt-prow/release/kubevirt/kubevirt/stable.txt)
 echo ${VERSION}
 kubectl create -f "https://github.com/kubevirt/kubevirt/releases/download/${VERSION}/kubevirt-operator.yaml"
@@ -29,7 +29,7 @@ kubectl create -f "https://github.com/kubevirt/kubevirt/releases/download/${VERS
 ## Containerized Data Importer (CDI)
 
 ```bash
-# Tested with v1.62.0
+# Tested with v1.63.1
 export VERSION=$(basename $(curl -s -w %{redirect_url} https://github.com/kubevirt/containerized-data-importer/releases/latest))
 echo ${VERSION}
 kubectl create -f https://github.com/kubevirt/containerized-data-importer/releases/download/${VERSION}/cdi-operator.yaml

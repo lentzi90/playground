@@ -230,6 +230,13 @@ kubectl label crd baremetalhosts.metal3.io cluster.x-k8s.io/move=""
 kubectl label crd hardwaredata.metal3.io clusterctl.cluster.x-k8s.io=""
 kubectl label crd hardwaredata.metal3.io clusterctl.cluster.x-k8s.io/move=""
 
+kubectl label crd ippools.ipam.metal3.io clusterctl.cluster.x-k8s.io=""
+kubectl label crd ippools.ipam.metal3.io cluster.x-k8s.io/move=""
+kubectl label crd ipclaims.ipam.metal3.io clusterctl.cluster.x-k8s.io=""
+kubectl label crd ipclaims.ipam.metal3.io cluster.x-k8s.io/move=""
+kubectl label crd ipaddresses.ipam.metal3.io clusterctl.cluster.x-k8s.io=""
+kubectl label crd ipaddresses.ipam.metal3.io cluster.x-k8s.io/move=""
+
 # Move the cluster. This will also move the BMHs and hardwaredata that are part of the cluster.
 clusterctl move --to-kubeconfig=kubeconfig.yaml
 
