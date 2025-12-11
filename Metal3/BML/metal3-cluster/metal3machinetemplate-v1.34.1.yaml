@@ -1,0 +1,19 @@
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: Metal3MachineTemplate
+metadata:
+  name: metal3-k8s-v1.34.1
+spec:
+  nodeReuse: false
+  template:
+    spec:
+      hostSelector:
+        matchLabels:
+          pool: lennart-centos
+      automatedCleaningMode: metadata
+      dataTemplate:
+        name: metal3-k8s-template
+      image:
+        checksum: d53ad84f0ae6c5ca977669fc73423293d1f2399f365aa25fc0db63a93a5bc52d
+        checksumType: sha256
+        url: http://192.168.0.1/CENTOS_10_NODE_IMAGE_K8S_v1.34.1.qcow2
+        format: qcow2

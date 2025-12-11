@@ -27,3 +27,7 @@ secretGenerator:
   envs:
   - ironic-htpasswd
   name: ironic-htpasswd
+
+images:
+- name: quay.io/metal3-io/ironic
+  newTag: "v29.0.0"

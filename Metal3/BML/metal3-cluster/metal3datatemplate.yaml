@@ -1,7 +1,7 @@
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: Metal3DataTemplate
 metadata:
-  name: metal3-k8s-controlplane-template
+  name: metal3-k8s-template
 spec:
   clusterName: metal3-k8s
   networkData:
@@ -16,6 +16,15 @@ spec:
             # fromHostInterface: eno1
             # fromHostInterface: ens5f0np0
       vlans:
+      - id: eno1.2
+        vlanID: 2
+        macAddress:
+          fromAnnotation:
+            object: baremetalhost
+            annotation: mac
+            # fromHostInterface: eno1
+            # fromHostInterface: ens5f0np0
+        vlanLink: eno1
       - id: eno1.5
         vlanID: 5
         macAddress:
@@ -30,11 +39,9 @@ spec:
       - id: internal
         link: eno1
         ipAddressFromIPPool: internal-ipv4-metal3-k8s
-        routes:
-        - network: 192.168.0.0
-          prefix: 24
-          gateway:
-            fromIPPool: internal-ipv4-metal3-k8s
+      - id: oob
+        link: eno1.2
+        ipAddressFromIPPool: oob-ipv4-metal3-k8s
       - id: external
         link: eno1.5
         ipAddressFromIPPool: external-ipv4-metal3-k8s
@@ -51,62 +58,10 @@ spec:
     strings:
     - key: vip
       value: 192.168.0.151
-    ipAddressesFromIPPool:
-    - apiGroup: ipam.metal3.io
-      key: internal_ip
-      kind: IPPool
-      name: internal-ipv4-metal3-k8s
----
-apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
-kind: Metal3DataTemplate
-metadata:
-  name: metal3-k8s-workers
-spec:
-  clusterName: metal3-k8s
-  networkData:
-    links:
-      ethernets:
-      - type: phy
-        id: eno1
-        macAddress:
-          fromAnnotation:
-            object: baremetalhost
-            annotation: mac
-            # fromHostInterface: eno1
-            # fromHostInterface: ens5f0np0
-      vlans:
-      - id: eno1.5
-        vlanID: 5
-        macAddress:
-          fromAnnotation:
-            object: baremetalhost
-            annotation: mac
-            # fromHostInterface: eno1
-            # fromHostInterface: ens5f0np0
-        vlanLink: eno1
-    networks:
-      ipv4:
-      - id: internal
-        link: eno1
-        ipAddressFromIPPool: internal-ipv4-metal3-k8s
-        routes:
-        - network: 192.168.0.0
-          prefix: 24
-          gateway:
-            fromIPPool: internal-ipv4-metal3-k8s
-      - id: external
-        link: eno1.5
-        ipAddressFromIPPool: external-ipv4-metal3-k8s
-        routes:
-        - network: 0.0.0.0
-          prefix: 0
-          gateway:
-            fromIPPool: external-ipv4-metal3-k8s
-    services:
-      dns:
-      - 8.8.8.8
-      - 1.1.1.1
-  metaData:
+    fromAnnotations:
+    - annotation: vip_interface
+      key: vip_interface
+      object: baremetalhost
     ipAddressesFromIPPool:
     - apiGroup: ipam.metal3.io
       key: internal_ip
