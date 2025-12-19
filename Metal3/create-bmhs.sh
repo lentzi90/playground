@@ -33,6 +33,7 @@ do
     --vcpus="${CPUS}" \
     --disk size=25 \
     --boot uefi,hd,network \
+    --boot firmware.feature0.name=secure-boot,firmware.feature0.enabled=no \
     --import \
     --network network=baremetal-e2e,mac="${BOOT_MAC_ADDRESS}" \
     --noautoconsole \

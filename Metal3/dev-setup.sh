@@ -29,6 +29,12 @@ sudo iptables -I FORWARD -i metal3 -o kind -j ACCEPT
 # Create a kind cluster using the configuration from kind.yaml
 kind create cluster --config "${REPO_ROOT}/Metal3/kind.yaml"
 
+# TODO: This is needed because dnsmasq checks if the DHCP address range
+# is available. Keepalived only assigns a /32 single address and then
+# dnsmasq errors with:
+# dnsmasq-dhcp: no address range available for DHCP request via eth0
+docker exec kind-control-plane ip addr add 192.168.222.2/24 dev eth0
+
 # Start sushy-tools container to provide Redfish BMC emulation
 docker run --name sushy-tools --rm --network host -d \
   -v /var/run/libvirt:/var/run/libvirt \
