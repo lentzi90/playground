@@ -9,24 +9,9 @@ generatorOptions:
   disableNameSuffixHash: true
 
 configMapGenerator:
-- name: ironic-operator-config
+- name: ironic-standalone-operator-ironic-standalone-operator-config
+  namespace: ironic-standalone-operator-system
+  behavior: replace
   literals:
-  - IPA_BASEURI=http://192.168.222.1
-
-patches:
-- target:
-    kind: Deployment
-    name: ironic-standalone-operator-controller-manager
-  patch: |-
-    apiVersion: apps/v1
-    kind: Deployment
-    metadata:
-      name: ironic-standalone-operator
-    spec:
-      template:
-        spec:
-          containers:
-          - name: manager
-            envFrom:
-            - configMapRef:
-                name: ironic-operator-config
+  # - IPA_BASEURI=http://192.168.222.1
+  - IPA_BASEURI=https://artifactory.nordix.org/artifactory/openstack-remote-cache/ironic-python-agent/dib
