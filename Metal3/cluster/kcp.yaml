@@ -16,7 +16,7 @@ spec:
       rollingUpdate:
         maxSurge: 1
       type: RollingUpdate
-  version: v1.34.1
+  version: v1.35.0
   kubeadmConfigSpec:
     files:
     - contentFrom:
