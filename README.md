@@ -166,13 +166,6 @@ sha256 output/ubuntu-2404-kube-v1.31.1/ubuntu-2404-kube-v1.31.1.raw
 ## Metal3
 
 ```bash
-# Generate credentials for Ironic
-IRONIC_USERNAME="$(uuidgen)"
-IRONIC_PASSWORD="$(uuidgen)"
-echo "${IRONIC_USERNAME}" > Metal3/bmo/ironic-username
-echo "${IRONIC_PASSWORD}" > Metal3/bmo/ironic-password
-echo "IRONIC_HTPASSWD=$(htpasswd -n -b -B "${IRONIC_USERNAME}" "${IRONIC_PASSWORD}")" > Metal3/ironic/ironic-htpasswd
-
 # Download disk image
 wget -O Metal3/images/ubuntu-2404.img https://cloud-images.ubuntu.com/releases/noble/release/ubuntu-24.04-server-cloudimg-amd64.img
 # Convert to raw
