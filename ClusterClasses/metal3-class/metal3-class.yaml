@@ -1,42 +1,36 @@
-apiVersion: cluster.x-k8s.io/v1beta1
+apiVersion: cluster.x-k8s.io/v1beta2
 kind: ClusterClass
 metadata:
   name: lennart-metal3-v0.1.0
 spec:
   controlPlane:
-    ref:
-      apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+    templateRef:
+      apiVersion: controlplane.cluster.x-k8s.io/v1beta2
       kind: KubeadmControlPlaneTemplate
       name: lennart-metal3-v0.1.0
-      namespace: default
     machineInfrastructure:
-      ref:
+      templateRef:
         kind: Metal3MachineTemplate
         apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
         name: lennart-metal3-v0.1.0
-        namespace: default
   infrastructure:
-    ref:
+    templateRef:
       apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
       kind: Metal3ClusterTemplate
       name: lennart-metal3-v0.1.0
-      namespace: default
   workers:
     machineDeployments:
     - class: default-worker
-      template:
-        bootstrap:
-          ref:
-            apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
-            kind: KubeadmConfigTemplate
-            name: lennart-metal3-v0.1.0-default-worker
-            namespace: default
-        infrastructure:
-          ref:
-            apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
-            kind: Metal3MachineTemplate
-            name: lennart-metal3-v0.1.0-default-worker
-            namespace: default
+      bootstrap:
+        templateRef:
+          apiVersion: bootstrap.cluster.x-k8s.io/v1beta2
+          kind: KubeadmConfigTemplate
+          name: lennart-metal3-v0.1.0-default-worker
+      infrastructure:
+        templateRef:
+          apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+          kind: Metal3MachineTemplate
+          name: lennart-metal3-v0.1.0-default-worker
   variables:
   - name: controlPlaneEndpoint
     required: false
@@ -48,12 +42,11 @@ spec:
           host:
             type: string
             description: "The host IP address for the control plane endpoint"
+            default: "192.168.222.100"
           port:
             type: integer
             description: "The port number for the control plane endpoint"
-        default:
-          host: "192.168.222.100"
-          port: 6443
+            default: 6443
   - name: imageName
     required: false
     schema:
@@ -88,6 +81,14 @@ spec:
           Use a sysext overlay to add the Kubernetes components to the image.
           This is for use with flatcar and similar images.
         default: false
+  - name: injectKubeVip
+    required: false
+    schema:
+      openAPIV3Schema:
+        type: boolean
+        description: |
+          Use Kube-VIP to provide a virtual IP for the control plane.
+        default: true
   - name: users
     required: false
     schema:
@@ -191,7 +192,7 @@ spec:
     description: "Configure the users, their SSH keys and sudo access"
     definitions:
     - selector:
-        apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+        apiVersion: controlplane.cluster.x-k8s.io/v1beta2
         kind: KubeadmControlPlaneTemplate
         matchResources:
           controlPlane: true
@@ -201,7 +202,7 @@ spec:
         valueFrom:
           variable: users
     - selector:
-        apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+        apiVersion: bootstrap.cluster.x-k8s.io/v1beta2
         kind: KubeadmConfigTemplate
         matchResources:
           machineDeploymentClass:
@@ -244,12 +245,11 @@ spec:
         path: /spec/template/spec/dataTemplate/name
         valueFrom:
           variable: workerDataTemplateName
-  - name: setupScripts
-    description: "Add scripts for installing k8s on plain cloud images."
-    enabledIf: "{{ .injectSetupScripts }}"
+  - name: controlPlaneScriptsAndFiles
+    description: "Add scripts, files, and commands for control plane nodes (setup scripts and/or kube-vip)."
     definitions:
     - selector:
-        apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+        apiVersion: controlplane.cluster.x-k8s.io/v1beta2
         kind: KubeadmControlPlaneTemplate
         matchResources:
           controlPlane: true
@@ -258,17 +258,26 @@ spec:
         path: /spec/template/spec/kubeadmConfigSpec/preKubeadmCommands
         valueFrom:
           template: |
+            {{ if .injectSetupScripts }}
             - KUBERNETES_VERSION={{ .builtin.controlPlane.version }} /tmp/install-k8s.sh
-    - selector:
-        apiVersion: controlplane.cluster.x-k8s.io/v1beta1
-        kind: KubeadmControlPlaneTemplate
-        matchResources:
-          controlPlane: true
-      jsonPatches:
+            {{ end }}
+            {{ if .injectKubeVip }}
+            # See https://github.com/kube-vip/kube-vip/issues/684
+            - "sed -i 's#path: /etc/kubernetes/admin.conf#path: /etc/kubernetes/super-admin.conf#' /etc/kubernetes/manifests/kube-vip.yaml"
+            {{ end }}
+      - op: add
+        path: /spec/template/spec/kubeadmConfigSpec/postKubeadmCommands
+        valueFrom:
+          template: |
+            {{ if .injectKubeVip }}
+            # See https://github.com/kube-vip/kube-vip/issues/684
+            - "sed -i 's#path: /etc/kubernetes/super-admin.conf#path: /etc/kubernetes/admin.conf#' /etc/kubernetes/manifests/kube-vip.yaml"
+            {{ end }}
       - op: add
         path: /spec/template/spec/kubeadmConfigSpec/files
         valueFrom:
           template: |
+            {{ if .injectSetupScripts }}
             - contentFrom:
                 secret:
                   key: ubuntu-install-k8s-release-artifacts.sh
@@ -276,8 +285,83 @@ spec:
               path: /tmp/install-k8s.sh
               owner: root:root
               permissions: '0755'
+            {{ end }}
+            {{ if .injectKubeVip }}
+            - content: |
+                apiVersion: v1
+                kind: Pod
+                metadata:
+                  name: kube-vip
+                  namespace: kube-system
+                spec:
+                  containers:
+                  - args:
+                    - manager
+                    env:
+                    - name: vip_arp
+                      value: "true"
+                    - name: port
+                      value: "{{ .controlPlaneEndpoint.port }}"
+                    - name: vip_nodename
+                      valueFrom:
+                        fieldRef:
+                          fieldPath: spec.nodeName
+                    - name: vip_interface
+                      value: enp1s0
+                    - name: vip_subnet
+                      value: "32"
+                    - name: dns_mode
+                      value: first
+                    - name: cp_enable
+                      value: "true"
+                    - name: cp_namespace
+                      value: kube-system
+                    - name: vip_leaderelection
+                      value: "true"
+                    - name: vip_leasename
+                      value: plndr-cp-lock
+                    - name: vip_leaseduration
+                      value: "5"
+                    - name: vip_renewdeadline
+                      value: "3"
+                    - name: vip_retryperiod
+                      value: "1"
+                    - name: address
+                      value: {{ .controlPlaneEndpoint.host }}
+                    - name: prometheus_server
+                      value: :2112
+                    image: ghcr.io/kube-vip/kube-vip:v1.0.0
+                    imagePullPolicy: IfNotPresent
+                    name: kube-vip
+                    securityContext:
+                      capabilities:
+                        add:
+                        - NET_ADMIN
+                        - NET_RAW
+                        drop:
+                        - ALL
+                    volumeMounts:
+                    - mountPath: /etc/kubernetes/admin.conf
+                      name: kubeconfig
+                  hostAliases:
+                  - hostnames:
+                    - kubernetes
+                    ip: 127.0.0.1
+                  hostNetwork: true
+                  volumes:
+                  - hostPath:
+                      path: /etc/kubernetes/admin.conf
+                    name: kubeconfig
+              path: /etc/kubernetes/manifests/kube-vip.yaml
+              owner: root:root
+              permissions: '0644'
+            {{ end }}
+  - name: workerScriptsAndFiles
+    description: "Add scripts and files for worker nodes."
+    enabledIf: "{{ .injectSetupScripts }}"
+    definitions:
     - selector:
-        apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+        apiVersion: bootstrap.cluster.x-k8s.io/v1beta2
         kind: KubeadmConfigTemplate
         matchResources:
           machineDeploymentClass:
@@ -295,14 +379,6 @@ spec:
               path: /tmp/install-k8s.sh
               owner: root:root
               permissions: '0755'
-    - selector:
-        apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
-        kind: KubeadmConfigTemplate
-        matchResources:
-          machineDeploymentClass:
-            names:
-            - default-worker
-      jsonPatches:
       - op: add
         path: /spec/template/spec/preKubeadmCommands
         valueFrom:

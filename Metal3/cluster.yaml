@@ -1,4 +1,4 @@
-apiVersion: cluster.x-k8s.io/v1beta1
+apiVersion: cluster.x-k8s.io/v1beta2
 kind: Cluster
 metadata:
   name: test-1
@@ -6,7 +6,9 @@ metadata:
     cni: calico
 spec:
   topology:
-    class: lennart-metal3-v0.1.0
+    classRef:
+      name: lennart-metal3-v0.1.0
+      namespace: default
     version: v1.35.0
     variables:
     - name: controlPlaneEndpoint

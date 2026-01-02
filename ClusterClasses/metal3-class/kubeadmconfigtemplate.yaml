@@ -1,4 +1,4 @@
-apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+apiVersion: bootstrap.cluster.x-k8s.io/v1beta2
 kind: KubeadmConfigTemplate
 metadata:
   name: lennart-metal3-v0.1.0-default-worker
@@ -9,4 +9,5 @@ spec:
         nodeRegistration:
           name: '{{ ds.meta_data.name }}'
           kubeletExtraArgs:
-            node-labels: 'metal3.io/uuid={{ ds.meta_data.uuid }}'
+          - name: node-labels
+            value: 'metal3.io/uuid={{ ds.meta_data.uuid }}'
