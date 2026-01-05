@@ -10,6 +10,9 @@ spec:
       - contentFrom:
           secret:
             key: ubuntu-install-k8s-release-artifacts.sh
+            # key: centos-install-k8s-release-artifacts.sh
+            # key: ubuntu-install-k8s.sh
+            # key: ubuntu-sysext-k8s.sh
             name: install-k8s
         path: /tmp/install-k8s.sh
         owner: root:root

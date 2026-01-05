@@ -11,7 +11,7 @@ spec:
       dataTemplate:
         name: test-1-controlplane-template
       image:
-        checksum: cb0ba1e5a579188fabab89a6745891ce8752aef926ffa70ec59b8570fbb7725e
+        checksum: 53a4724d2184b8999672c63a10ce19d571848bb53aeb118f577d642d09beaa2e
         checksumType: sha256
         format: raw
         url: http://192.168.222.1/ubuntu-2404.raw
@@ -29,7 +29,9 @@ spec:
       dataTemplate:
         name: test-1-workers-template
       image:
-        checksum: cb0ba1e5a579188fabab89a6745891ce8752aef926ffa70ec59b8570fbb7725e
+        checksum: 53a4724d2184b8999672c63a10ce19d571848bb53aeb118f577d642d09beaa2e
+        # checksum: 9d041f354f16d6c4ade89634ba435d34f9a4dc4a4ddce7906cfce26e996147f2
         checksumType: sha256
         format: raw
         url: http://192.168.222.1/ubuntu-2404.raw
+        # url: http://192.168.222.1/centos-stream-10.raw

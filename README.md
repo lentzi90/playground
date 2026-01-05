@@ -168,8 +168,13 @@ sha256 output/ubuntu-2404-kube-v1.31.1/ubuntu-2404-kube-v1.31.1.raw
 ```bash
 # Download disk image
 wget -O Metal3/images/ubuntu-2404.img https://cloud-images.ubuntu.com/releases/noble/release/ubuntu-24.04-server-cloudimg-amd64.img
+wget -O Metal3/images/centos-stream-10.img https://cloud.centos.org/centos/10-stream/x86_64/images/CentOS-Stream-GenericCloud-x86_64-10-latest.x86_64.qcow2
 # Convert to raw
 qemu-img convert -f qcow2 -O raw Metal3/images/ubuntu-2404.img Metal3/images/ubuntu-2404.raw
+qemu-img convert -f qcow2 -O raw Metal3/images/centos-stream-10.img Metal3/images/centos-stream-10.raw
+# Calculate checksums
+sha256 Metal3/images/ubuntu-2404.raw
+sha256 Metal3/images/centos-stream-10.raw
 
 ./Metal3/dev-setup.sh
 # Wait for BMO to come up

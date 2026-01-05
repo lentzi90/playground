@@ -19,7 +19,7 @@ spec:
     - name: addImageVersion
       value: false
     - name: imageChecksum
-      value: cb0ba1e5a579188fabab89a6745891ce8752aef926ffa70ec59b8570fbb7725e
+      value: 53a4724d2184b8999672c63a10ce19d571848bb53aeb118f577d642d09beaa2e
     - name: injectSetupScripts
       value: true
     - name: users
