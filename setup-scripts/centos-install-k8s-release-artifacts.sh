@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-KUBERNETES_VERSION="${KUBERNETES_VERSION:-v1.34.1}"
+KUBERNETES_VERSION="${KUBERNETES_VERSION:-v1.35.0}"
 # KUBERNETES_VERSION="$(curl -sSL https://dl.k8s.io/release/stable.txt)"
 
 # Kubernetes release tooling
@@ -8,16 +8,27 @@ KUBERNETES_VERSION="${KUBERNETES_VERSION:-v1.34.1}"
 RELEASE_VERSION="${RELEASE_VERSION:-v0.18.0}"
 
 # https://github.com/kubernetes-sigs/cri-tools/releases
-CRICTL_VERSION="v1.34.0"
+CRICTL_VERSION="v1.35.0"
 
 # https://github.com/containernetworking/plugins/releases
-CNI_PLUGINS_VERSION="v1.8.0"
+CNI_PLUGINS_VERSION="v1.9.0"
 
-CRIO_VERSION=v1.34
+CRIO_VERSION=v1.35
 
-ARCH=$(uname -m)
+uname_arch=$(uname -m)
+case "${uname_arch}" in
+    x86_64)
+        ARCH="amd64"
+        ;;
+    aarch64)
+        ARCH="arm64"
+        ;;
+    *)
+        ARCH="${uname_arch}"
+        ;;
+esac
 
-echo "Installing Kubernetes ${KUBERNETES_VERSION} on $${ARCH} architecture"
+echo "Installing Kubernetes ${KUBERNETES_VERSION} on ${ARCH} architecture"
 echo "Using release version ${RELEASE_VERSION}"
 echo "Using CRI tools version ${CRICTL_VERSION}"
 echo "Using CNI plugins version ${CNI_PLUGINS_VERSION}"
@@ -35,9 +46,9 @@ gpgcheck=1
 gpgkey=https://download.opensuse.org/repositories/isv:/cri-o:/stable:/$CRIO_VERSION/rpm/repodata/repomd.xml.key
 EOF
 
+sudo dnf install -y container-selinux cri-o systemd-resolved
+sudo systemctl enable --now systemd-resolved.service
 sudo systemctl enable --now crio.service
-
-sudo dnf install -y container-selinux cri-o
 
 # Install crictl
 curl -L "https://github.com/kubernetes-sigs/cri-tools/releases/download/${CRICTL_VERSION}/crictl-${CRICTL_VERSION}-linux-${ARCH}.tar.gz" | sudo tar -C /usr/local/bin -xz
@@ -56,6 +67,11 @@ sudo mkdir -p /usr/lib/systemd/system/kubelet.service.d
 sudo mv 10-kubeadm.conf /usr/lib/systemd/system/kubelet.service.d/10-kubeadm.conf
 curl -L --output kubelet.service https://github.com/kubernetes/release/raw/${RELEASE_VERSION}/cmd/krel/templates/latest/kubelet/kubelet.service
 sudo mv kubelet.service /usr/lib/systemd/system/kubelet.service
+
+sudo restorecon -v /usr/lib/systemd/system/kubelet.service
+sudo restorecon -v /usr/lib/systemd/system/kubelet.service.d/10-kubeadm.conf
+sudo systemctl daemon-reload
+sudo systemctl enable kubelet
 
 # Disable swap
 sudo swapoff -a
