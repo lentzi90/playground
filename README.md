@@ -173,8 +173,10 @@ wget -O Metal3/images/centos-stream-10.img https://cloud.centos.org/centos/10-st
 qemu-img convert -f qcow2 -O raw Metal3/images/ubuntu-2404.img Metal3/images/ubuntu-2404.raw
 qemu-img convert -f qcow2 -O raw Metal3/images/centos-stream-10.img Metal3/images/centos-stream-10.raw
 # Calculate checksums
-sha256 Metal3/images/ubuntu-2404.raw
-sha256 Metal3/images/centos-stream-10.raw
+pushd Metal3/images
+sha256sum ubuntu-2404.raw > ubuntu-2404.raw.sha256sum
+sha256sum centos-stream-10.raw > centos-stream-10.raw.sha256sum
+popd
 
 ./Metal3/dev-setup.sh
 # Wait for BMO to come up
