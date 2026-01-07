@@ -1,13 +1,9 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: ironic.metal3.io/v1alpha1
+kind: Ironic
 metadata:
   name: ironic
+  namespace: baremetal-operator-system
 spec:
-  template:
-    spec:
-      nodeSelector:
-        node-role.kubernetes.io/control-plane: ""
-      tolerations:
-      - key: node-role.kubernetes.io/control-plane
-        operator: Exists
-        effect: NoSchedule
+  networking:
+    ipAddress: "192.168.222.3"
+    interface: enp1s0

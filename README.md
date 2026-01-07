@@ -217,7 +217,8 @@ Turn the workload cluster into a management cluster.
 ```bash
 clusterctl init --control-plane kubeadm --infrastructure metal3 --ipam metal3
 # Install Ironic and BMO
-kubectl apply -k Metal3/bmo-management
+kubectl apply -k Metal3/irso
+kubectl apply -k Metal3/bmo
 kubectl apply -k Metal3/ironic-management
 ```
 
@@ -244,14 +245,9 @@ clusterctl move --to-kubeconfig=kubeconfig.yaml
 mkdir -p Metal3/tmp/bmhs
 for bmh in $(kubectl get bmh -o jsonpath="{.items[*].metadata.name}"); do
   echo "Saving BMH ${bmh}..."
-  # Save the BMH status
-  # Remove status.hardware since this is part of the hardwaredata
-  kubectl get bmh "${bmh}" -o jsonpath="{.status}" |
-   jq 'del(.hardware)' > "Metal3/tmp/bmhs/${bmh}-status.json"
-  # Save the BMH with the status annotation
-  kubectl annotate bmh "${bmh}" \
-    baremetalhost.metal3.io/status="$(cat Metal3/tmp/bmhs/${bmh}-status.json)" \
-    --dry-run=client -o yaml > "Metal3/tmp/bmhs/${bmh}-bmh.yaml"
+  kubectl get bmh "${bmh}" -o yaml > "Metal3/tmp/bmhs/${bmh}-bmh.yaml"
+  # Disable inspection
+  yq eval '.spec.inspectionMode = "disabled"' -i "Metal3/tmp/bmhs/${bmh}-bmh.yaml"
   # Save the hardwaredata
   kubectl get hardwaredata "${bmh}" -o yaml > "Metal3/tmp/bmhs/${bmh}-hardwaredata.yaml"
   # Save the BMC credentials
@@ -260,8 +256,6 @@ for bmh in $(kubectl get bmh -o jsonpath="{.items[*].metadata.name}"); do
 
   # Detach BMHs
   kubectl annotate bmh "${bmh}" baremetalhost.metal3.io/detached="manual-move"
-  # Cleanup
-  rm "Metal3/tmp/bmhs/${bmh}-status.json"
 done
 
 # Apply the BMHs and hardwaredata in the management cluster

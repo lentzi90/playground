@@ -8,7 +8,7 @@ spec:
     dhcp:
       gatewayAddress: "192.168.222.1"
       dnsAddress: "192.168.222.1"
-      rangeBegin: "192.168.222.3"
+      rangeBegin: "192.168.222.5"
       rangeEnd: "192.168.222.199"
       networkCIDR: "192.168.222.0/24"
     interface: "eth0"
