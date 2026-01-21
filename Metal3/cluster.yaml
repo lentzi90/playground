@@ -19,7 +19,7 @@ spec:
     - name: addImageVersion
       value: false
     - name: imageChecksum
-      value: 53a4724d2184b8999672c63a10ce19d571848bb53aeb118f577d642d09beaa2e
+      value: http://192.168.222.1/ubuntu-2404.raw.sha256sum
     - name: injectSetupScripts
       value: true
     - name: users

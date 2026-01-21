@@ -244,6 +244,7 @@ kubectl label crd ipaddresses.ipam.metal3.io cluster.x-k8s.io/move=""
 clusterctl move --to-kubeconfig=kubeconfig.yaml
 
 # Manually move BMHs that are not part of the cluster
+# TODO: This only works for Available. For provisioned BMHs, we need the status annotation.
 mkdir -p Metal3/tmp/bmhs
 for bmh in $(kubectl get bmh -o jsonpath="{.items[*].metadata.name}"); do
   echo "Saving BMH ${bmh}..."
