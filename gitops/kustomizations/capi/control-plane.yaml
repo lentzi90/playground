@@ -1,0 +1,16 @@
+apiVersion: operator.cluster.x-k8s.io/v1alpha2
+kind: ControlPlaneProvider
+metadata:
+  name: kubeadm
+  namespace: capi-kubeadm-control-plane-system
+spec:
+  version: v1.12.1
+  manager:
+    featureGates:
+      ClusterTopology: true
+      KubeadmBootstrapFormatIgnition: true
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: capi-kubeadm-control-plane-system
