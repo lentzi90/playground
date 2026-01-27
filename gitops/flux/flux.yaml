@@ -1,0 +1,18 @@
+apiVersion: fluxcd.controlplane.io/v1
+kind: FluxInstance
+metadata:
+  name: flux
+  namespace: flux-system
+spec:
+  distribution:
+    version: "2.7.5"
+    registry: "ghcr.io/fluxcd"
+    artifact: "oci://ghcr.io/controlplaneio-fluxcd/flux-operator-manifests"
+  cluster:
+    type: kubernetes
+    size: medium
+  sync:
+    kind: GitRepository
+    url: "https://github.com/lentzi90/playground.git"
+    ref: "refs/heads/main"
+    path: "gitops/flux"

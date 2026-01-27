@@ -1,0 +1,10 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: playground
+  namespace: flux-system
+spec:
+  interval: 5m
+  url: https://github.com/lentzi90/playground.git
+  ref:
+    branch: main
