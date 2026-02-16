@@ -1,0 +1,65 @@
+# Provider for sending webhooks to a local endpoint
+# Run a local webhook receiver with: nc -l 8080 or use a tool like webhook.site
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Provider
+metadata:
+  name: webhook-local
+  namespace: flux-system
+spec:
+  type: generic
+  # Points to the in-cluster webhook receiver service
+  address: http://webhook-receiver.webhook-receiver.svc.cluster.local/webhook
+---
+# Alert for successful changes - new revisions applied
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Alert
+metadata:
+  name: flux-changes
+  namespace: flux-system
+spec:
+  providerRef:
+    name: webhook-local
+  eventSeverity: info
+  eventSources:
+  - kind: Kustomization
+    name: '*'
+  - kind: GitRepository
+    name: '*'
+  # Only include events about actual changes
+  inclusionList:
+  # GitRepository: new revision detected
+  - ".*[Ss]tored artifact for revision.*"
+  - ".*[Ff]etched revision.*"
+  # Kustomization: actual resource changes
+  - ".*created.*"
+  - ".*configured.*"
+  - ".*deleted.*"
+  - ".*[Aa]pplied revision.*"
+  # Exclude noise from periodic reconciliations
+  exclusionList:
+  - ".*no changes since.*"
+  - ".*next run in.*"
+  eventMetadata:
+    cluster: kind-local
+    alertType: change
+---
+# Alert for errors
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Alert
+metadata:
+  name: flux-errors
+  namespace: flux-system
+spec:
+  providerRef:
+    name: webhook-local
+  eventSeverity: error
+  eventSources:
+  - kind: Kustomization
+    name: '*'
+  - kind: GitRepository
+    name: '*'
+  - kind: HelmRelease
+    name: '*'
+  eventMetadata:
+    cluster: kind-local
+    alertType: error

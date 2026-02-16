@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
 - flux.yaml
 - gitrepository.yaml
+- notifications.yaml
 - kustomizations/cert-manager.yaml
 - kustomizations/capi-operator.yaml
 - kustomizations/capi.yaml

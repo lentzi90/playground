@@ -1,0 +1,150 @@
+# Webhook receiver for testing Flux notifications
+# Deploy with: kubectl apply -f webhook-receiver/
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: webhook-receiver
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: webhook-receiver-script
+  namespace: webhook-receiver
+data:
+  server.py: |
+    #!/usr/bin/env python3
+    """Simple webhook receiver for testing Flux notifications."""
+    import json
+    import sys
+    from datetime import datetime
+    from http.server import HTTPServer, BaseHTTPRequestHandler
+
+    class WebhookHandler(BaseHTTPRequestHandler):
+        def do_POST(self):
+            content_length = int(self.headers.get("Content-Length", 0))
+            body = self.rfile.read(content_length)
+
+            print("\n" + "=" * 60, flush=True)
+            print(f"📨 Webhook received at {datetime.now().isoformat()}", flush=True)
+            print(f"   Path: {self.path}", flush=True)
+            print("-" * 60, flush=True)
+
+            try:
+                data = json.loads(body)
+                severity = data.get("severity", "unknown")
+                involved_obj = data.get("involvedObject", {})
+                kind = involved_obj.get("kind", "unknown")
+                name = involved_obj.get("name", "unknown")
+                namespace = involved_obj.get("namespace", "unknown")
+                message = data.get("message", "")
+                reason = data.get("reason", "")
+                metadata = data.get("metadata", {})
+
+                emoji = "❌" if severity == "error" else "✅" if severity == "info" else "❓"
+
+                print(f"{emoji} Severity: {severity}", flush=True)
+                print(f"   Object:  {kind}/{namespace}/{name}", flush=True)
+                print(f"   Reason:  {reason}", flush=True)
+                print(f"   Message: {message}", flush=True)
+
+                if metadata:
+                    print(f"   Metadata:", flush=True)
+                    for k, v in metadata.items():
+                        print(f"      {k}: {v}", flush=True)
+
+                print("-" * 60, flush=True)
+                print("Raw JSON:", flush=True)
+                print(json.dumps(data, indent=2), flush=True)
+            except json.JSONDecodeError:
+                print("Raw body (not JSON):", flush=True)
+                print(body.decode("utf-8", errors="replace"), flush=True)
+
+            print("=" * 60, flush=True)
+
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(b'{"status": "received"}')
+
+        def do_GET(self):
+            self.send_response(200)
+            self.send_header("Content-Type", "text/plain")
+            self.end_headers()
+            self.wfile.write(b"Webhook receiver is running\n")
+
+        def log_message(self, format, *args):
+            pass
+
+    def main():
+        port = int(sys.argv[1]) if len(sys.argv) > 1 else 8080
+        server = HTTPServer(("0.0.0.0", port), WebhookHandler)
+        print(f"🚀 Webhook receiver listening on http://0.0.0.0:{port}", flush=True)
+        print(f"   Waiting for Flux notifications...", flush=True)
+        server.serve_forever()
+
+    if __name__ == "__main__":
+        main()
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webhook-receiver
+  namespace: webhook-receiver
+  labels:
+    app: webhook-receiver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webhook-receiver
+  template:
+    metadata:
+      labels:
+        app: webhook-receiver
+    spec:
+      containers:
+      - name: webhook-receiver
+        image: python:3.12-slim
+        command: ["python", "/app/server.py"]
+        ports:
+        - containerPort: 8080
+          name: http
+        volumeMounts:
+        - name: script
+          mountPath: /app
+        resources:
+          requests:
+            memory: "32Mi"
+            cpu: "10m"
+          limits:
+            memory: "64Mi"
+            cpu: "100m"
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 2
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+      volumes:
+      - name: script
+        configMap:
+          name: webhook-receiver-script
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webhook-receiver
+  namespace: webhook-receiver
+spec:
+  selector:
+    app: webhook-receiver
+  ports:
+  - port: 80
+    targetPort: 8080
+    name: http
