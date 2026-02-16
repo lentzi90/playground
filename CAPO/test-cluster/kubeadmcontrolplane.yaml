@@ -40,6 +40,6 @@ spec:
       infrastructureRef:
         apiGroup: infrastructure.cluster.x-k8s.io
         kind: OpenStackMachineTemplate
-        name: lennart-test-plain
+        name: lennart-test-cp
   replicas: 1
   version: v1.35.0
