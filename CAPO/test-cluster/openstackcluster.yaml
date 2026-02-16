@@ -3,9 +3,9 @@ kind: OpenStackCluster
 metadata:
   name: lennart-test
 spec:
-  externalNetwork:
-    filter:
-      name: internet
+  disableExternalNetwork: true
+  disableAPIServerFloatingIP: true
+  apiServerFixedIP: "10.1.0.101"
   network:
     filter:
       name: metal3-ci-net
