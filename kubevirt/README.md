@@ -121,3 +121,34 @@ echo "Access Home Assistant at http://${ip_address}:8123"
 ```
 
 Now go to http://localhost:8123 to see that Home Assistant is running.
+
+## Cluster API Provider for KubeVirt
+
+Note: This requires cloud-provider-kind or similar to provide LoadBalancer services for the control plane endpoint.
+
+```bash
+clusterctl init --infrastructure kubevirt
+
+export NODE_VM_IMAGE_TEMPLATE="quay.io/capk/ubuntu-2404-container-disk:v1.34.1"
+export CAPK_GUEST_K8S_VERSION="${NODE_VM_IMAGE_TEMPLATE/*:/}"
+export CRI_PATH="unix:///var/run/containerd/containerd.sock"
+
+clusterctl generate cluster test-kv \
+  --infrastructure="kubevirt" \
+  --flavor lb \
+  --kubernetes-version ${CAPK_GUEST_K8S_VERSION} \
+  --control-plane-machine-count=1 \
+  --worker-machine-count=1 \
+  > kubevirt-cluster.yaml
+# Edit KubeadmConfigTemplate to remove spec.template.spec.joinConfiguration.
+# (Optional) Add instead users for ssh access:
+# users:
+# - name: centos
+#   sudo: 'ALL=(ALL) NOPASSWD:ALL'
+#   sshAuthorizedKeys:
+#   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOxg0/L9LWM8K6//pe5OYc7SK4vv6676uz6VRJGA44nl lennart
+
+kubectl apply -f kubevirt-cluster.yaml
+clusterctl get kubeconfig test-kv > kubevirt-kubeconfig.yaml
+kubectl --kubeconfig kubevirt-kubeconfig.yaml apply -k calico
+```
