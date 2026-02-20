@@ -1,0 +1,48 @@
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: OpenStackCluster
+metadata:
+  name: lennart-test
+spec:
+  apiServerLoadBalancer:
+    allowedCIDRs:
+    - 10.6.0.0/24
+    - 85.134.18.87/32
+    enabled: true
+  bastion:
+    enabled: false
+    spec:
+      flavor: c1m2-est
+      image:
+        id: 19e017ae-2759-479c-90ac-a400a3f64678
+      sshKeyName: lennart-ed25519
+  externalNetwork:
+    filter:
+      name: internet
+  identityRef:
+    cloudName: xerces-capo
+    name: lennart-test-cloud-config
+  managedSecurityGroups:
+    allNodesSecurityGroupRules:
+    - description: Calico - BGP
+      direction: ingress
+      etherType: IPv4
+      name: BGP (calico)
+      portRangeMax: 179
+      portRangeMin: 179
+      protocol: tcp
+      remoteManagedGroups:
+      - controlplane
+      - worker
+    - description: Calico IP-in-IP
+      direction: ingress
+      etherType: IPv4
+      name: IP-in-IP (calico)
+      protocol: "4"
+      remoteManagedGroups:
+      - controlplane
+      - worker
+    allowAllInClusterTraffic: false
+  managedSubnets:
+  - cidr: 10.6.0.0/24
+    dnsNameservers:
+    - 86.54.11.1

@@ -77,7 +77,7 @@ kubectl apply -f CAPO/cluster.yaml
 ### CAPO cluster
 
 ```bash
-kubectl apply -k CAPO/test-cluster
+kubectl apply -k CAPO/clusters/standard
 ```
 
 ### CAPO upstream ClusterClass

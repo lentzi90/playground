@@ -1,0 +1,45 @@
+apiVersion: controlplane.cluster.x-k8s.io/v1beta2
+kind: KubeadmControlPlane
+metadata:
+  name: lennart-test-control-plane
+spec:
+  kubeadmConfigSpec:
+    files:
+    - contentFrom:
+        secret:
+          key: ubuntu-install-k8s-release-artifacts.sh
+          name: install-k8s
+      path: /tmp/install-k8s.sh
+      owner: root:root
+      permissions: '0755'
+    preKubeadmCommands:
+    - /tmp/install-k8s.sh
+    clusterConfiguration:
+      controllerManager:
+        extraArgs:
+        - name: cloud-provider
+          value: external
+    initConfiguration:
+      nodeRegistration:
+        kubeletExtraArgs:
+        - name: cloud-provider
+          value: external
+        - name: provider-id
+          value: "openstack:///{{ v1.instance_id }}"
+        name: '{{ v1.local_hostname }}'
+    joinConfiguration:
+      nodeRegistration:
+        kubeletExtraArgs:
+        - name: cloud-provider
+          value: external
+        - name: provider-id
+          value: "openstack:///{{ v1.instance_id }}"
+        name: '{{ v1.local_hostname }}'
+  machineTemplate:
+    spec:
+      infrastructureRef:
+        apiGroup: infrastructure.cluster.x-k8s.io
+        kind: OpenStackMachineTemplate
+        name: lennart-test-cp
+  replicas: 1
+  version: v1.35.0
