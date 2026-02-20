@@ -1,0 +1,51 @@
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: OpenStackMachineTemplate
+metadata:
+  name: lennart-test-cp
+spec:
+  template:
+    spec:
+      flavor: c4m12-est
+      image:
+        id: 19e017ae-2759-479c-90ac-a400a3f64678
+        # filter:
+        #   name: Ubuntu-24.04
+      # rootVolume:
+      #   sizeGiB: 100
+      sshKeyName: lennart-ed25519
+      # Control plane nodes get a DHCP-assigned IP on the cluster network.
+      # allowedAddressPairs permits kube-vip to claim the VIP (10.1.0.101)
+      # on each CP node's port via gratuitous ARP.
+      # NOTE: Ensure 10.1.0.101 is outside the DHCP allocation pool to
+      # prevent it from being assigned to another host.
+      ports:
+      - network:
+          filter:
+            name: metal3-ci-net
+        fixedIPs:
+        - subnet:
+            filter:
+              name: metal3-ci-net-subnet
+        allowedAddressPairs:
+        - ipAddress: "10.1.0.101"
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: OpenStackMachineTemplate
+metadata:
+  name: lennart-test-worker
+spec:
+  template:
+    spec:
+      flavor: c4m12-est
+      image:
+        id: 19e017ae-2759-479c-90ac-a400a3f64678
+      sshKeyName: lennart-ed25519
+      # Workers get a port on the cluster network with a DHCP-assigned IP.
+      ports:
+      - network:
+          filter:
+            name: metal3-ci-net
+        fixedIPs:
+        - subnet:
+            filter:
+              name: metal3-ci-net-subnet

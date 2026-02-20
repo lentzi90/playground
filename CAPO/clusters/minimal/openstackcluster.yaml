@@ -1,0 +1,19 @@
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: OpenStackCluster
+metadata:
+  name: lennart-test
+spec:
+  disableExternalNetwork: true
+  disableAPIServerFloatingIP: true
+  apiServerFixedIP: "10.1.0.101"
+  network:
+    filter:
+      name: metal3-ci-net
+  subnets:
+  - filter:
+      name: metal3-ci-net-subnet
+  bastion:
+    enabled: false
+  identityRef:
+    cloudName: xerces-capo
+    name: lennart-test-cloud-config
