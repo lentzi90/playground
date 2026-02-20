@@ -13,8 +13,11 @@ spec:
       # rootVolume:
       #   sizeGiB: 100
       sshKeyName: lennart-ed25519
-      # Control plane node gets the API server fixed IP directly on its port.
-      # This IP must match apiServerFixedIP in the OpenStackCluster spec.
+      # Control plane nodes get a DHCP-assigned IP on the cluster network.
+      # allowedAddressPairs permits kube-vip to claim the VIP (10.1.0.101)
+      # on each CP node's port via gratuitous ARP.
+      # NOTE: Ensure 10.1.0.101 is outside the DHCP allocation pool to
+      # prevent it from being assigned to another host.
       ports:
       - network:
           filter:
@@ -23,7 +26,8 @@ spec:
         - subnet:
             filter:
               name: metal3-ci-net-subnet
-          ipAddress: "10.1.0.101"
+        allowedAddressPairs:
+        - ipAddress: "10.1.0.101"
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: OpenStackMachineTemplate
