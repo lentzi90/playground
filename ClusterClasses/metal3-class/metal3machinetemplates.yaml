@@ -6,9 +6,6 @@ spec:
   nodeReuse: false
   template:
     spec:
-      hostSelector:
-        matchLabels:
-          bmh-name: bmo-e2e-0
       automatedCleaningMode: metadata
       image:
         checksum: aab4cbba9707d14c58931f6e9fb75736d5fe3df0f52a4e19c70609e11b5623af

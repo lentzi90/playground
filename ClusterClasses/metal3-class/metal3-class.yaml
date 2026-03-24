@@ -3,6 +3,11 @@ kind: ClusterClass
 metadata:
   name: lennart-metal3-v0.1.0
 spec:
+  kubernetesVersions:
+  - v1.32.13
+  - v1.33.9
+  - v1.34.5
+  - v1.35.2
   controlPlane:
     templateRef:
       apiVersion: controlplane.cluster.x-k8s.io/v1beta2
