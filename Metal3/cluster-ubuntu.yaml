@@ -1,0 +1,34 @@
+apiVersion: cluster.x-k8s.io/v1beta2
+kind: Cluster
+metadata:
+  name: test-1
+  labels:
+    cni: calico
+spec:
+  topology:
+    classRef:
+      name: lennart-metal3-ubuntu-sysext-v0.1.0
+      namespace: default
+    # version: v1.35.2
+    version: v1.32.13
+    variables:
+    - name: controlPlaneEndpoint
+      value:
+        host: 192.168.222.100
+    - name: imageName
+      value: ubuntu-2404
+    - name: imageChecksum
+      value: http://192.168.222.1/ubuntu-2404.raw.sha256sum
+    - name: users
+      value:
+      - name: ubuntu
+        sudo: 'ALL=(ALL) NOPASSWD:ALL'
+        sshAuthorizedKeys:
+        - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOxg0/L9LWM8K6//pe5OYc7SK4vv6676uz6VRJGA44nl lennart
+    controlPlane:
+      replicas: 1
+    workers:
+      machineDeployments:
+      - class: default-worker
+        name: md-0
+        replicas: 1

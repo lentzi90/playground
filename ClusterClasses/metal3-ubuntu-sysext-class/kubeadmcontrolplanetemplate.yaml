@@ -1,0 +1,25 @@
+apiVersion: controlplane.cluster.x-k8s.io/v1beta2
+kind: KubeadmControlPlaneTemplate
+metadata:
+  name: lennart-metal3-ubuntu-sysext-v0.1.0
+spec:
+  template:
+    spec:
+      kubeadmConfigSpec:
+        joinConfiguration:
+          nodeRegistration:
+            name: '{{ ds.meta_data.name }}'
+            kubeletExtraArgs:
+            - name: node-labels
+              value: 'metal3.io/uuid={{ ds.meta_data.uuid }}'
+        initConfiguration:
+          nodeRegistration:
+            name: '{{ ds.meta_data.name }}'
+            kubeletExtraArgs:
+            - name: node-labels
+              value: 'metal3.io/uuid={{ ds.meta_data.uuid }}'
+      rollout:
+        strategy:
+          type: RollingUpdate
+          rollingUpdate:
+            maxSurge: 1

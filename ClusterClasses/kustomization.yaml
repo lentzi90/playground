@@ -3,4 +3,5 @@ kind: Kustomization
 resources:
 - metal3-class
 - metal3-flatcar-class
+- metal3-ubuntu-sysext-class
 - capo-class
