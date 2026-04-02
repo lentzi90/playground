@@ -1,0 +1,45 @@
+apiVersion: controlplane.cluster.x-k8s.io/v1beta2
+kind: KubeadmControlPlaneTemplate
+metadata:
+  name: lennart-metal3-flatcar-v0.1.0
+spec:
+  template:
+    spec:
+      kubeadmConfigSpec:
+        format: ignition
+        ignition:
+          containerLinuxConfig:
+            # additionalConfig is replaced at runtime by the flatcarSysextConfig
+            # ClusterClass patch, which injects the correct Kubernetes version into
+            # the sysext storage links, sysupdate config URLs, and systemd units.
+            additionalConfig: "{}"
+        initConfiguration:
+          nodeRegistration:
+            # On Flatcar/Ignition, cloud-init datasource templates such as
+            # {{ ds.meta_data.name }} are never evaluated because cloud-init does
+            # not run.  Instead coreos-metadata.service fetches node metadata from
+            # the Ironic/OpenStack endpoint and writes it to
+            # /run/metadata/flatcar.  The kubeadm.service dropin (injected via the
+            # flatcarSysextConfig patch) loads that file as an EnvironmentFile so
+            # that the preKubeadmCommands below can substitute the variables into
+            # /etc/kubeadm.yml before kubeadm runs.
+            name: '${COREOS_OPENSTACK_HOSTNAME}'
+            kubeletExtraArgs:
+            - name: node-labels
+              value: 'metal3.io/uuid=${COREOS_OPENSTACK_INSTANCE_UUID}'
+        joinConfiguration:
+          nodeRegistration:
+            name: '${COREOS_OPENSTACK_HOSTNAME}'
+            kubeletExtraArgs:
+            - name: node-labels
+              value: 'metal3.io/uuid=${COREOS_OPENSTACK_INSTANCE_UUID}'
+        preKubeadmCommands:
+        - export COREOS_OPENSTACK_HOSTNAME=${COREOS_OPENSTACK_HOSTNAME%.*}
+        - export COREOS_OPENSTACK_INSTANCE_UUID=${COREOS_OPENSTACK_INSTANCE_UUID}
+        - envsubst < /etc/kubeadm.yml > /etc/kubeadm.yml.tmp
+        - mv /etc/kubeadm.yml.tmp /etc/kubeadm.yml
+      rollout:
+        strategy:
+          type: RollingUpdate
+          rollingUpdate:
+            maxSurge: 1

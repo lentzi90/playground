@@ -1,0 +1,28 @@
+apiVersion: bootstrap.cluster.x-k8s.io/v1beta2
+kind: KubeadmConfigTemplate
+metadata:
+  name: lennart-metal3-flatcar-v0.1.0-default-worker
+spec:
+  template:
+    spec:
+      format: ignition
+      ignition:
+        containerLinuxConfig:
+          # additionalConfig is populated via ClusterClass patch (flatcarSysextConfig)
+          # with the Kubernetes sysext overlay configuration for the correct version.
+          additionalConfig: "{}"
+      joinConfiguration:
+        nodeRegistration:
+          # coreos-metadata.service fetches metadata from the Ironic/OpenStack endpoint
+          # and writes COREOS_OPENSTACK_HOSTNAME to /run/metadata/flatcar.
+          # preKubeadmCommands then trims the FQDN and runs envsubst to substitute
+          # ${COREOS_OPENSTACK_HOSTNAME} into /etc/kubeadm.yml before kubeadm runs.
+          name: '${COREOS_OPENSTACK_HOSTNAME}'
+          kubeletExtraArgs:
+          - name: node-labels
+            value: 'metal3.io/uuid=${COREOS_OPENSTACK_INSTANCE_UUID}'
+      preKubeadmCommands:
+      - export COREOS_OPENSTACK_HOSTNAME=${COREOS_OPENSTACK_HOSTNAME%.*}
+      - export COREOS_OPENSTACK_INSTANCE_UUID=${COREOS_OPENSTACK_INSTANCE_UUID}
+      - envsubst < /etc/kubeadm.yml > /etc/kubeadm.yml.tmp
+      - mv /etc/kubeadm.yml.tmp /etc/kubeadm.yml

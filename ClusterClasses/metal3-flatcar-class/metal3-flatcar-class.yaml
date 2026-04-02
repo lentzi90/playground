@@ -1,0 +1,642 @@
+apiVersion: cluster.x-k8s.io/v1beta2
+kind: ClusterClass
+metadata:
+  name: lennart-metal3-flatcar-v0.1.0
+spec:
+  kubernetesVersions:
+  - v1.32.13
+  - v1.33.9
+  - v1.34.5
+  - v1.35.2
+  controlPlane:
+    templateRef:
+      apiVersion: controlplane.cluster.x-k8s.io/v1beta2
+      kind: KubeadmControlPlaneTemplate
+      name: lennart-metal3-flatcar-v0.1.0
+    machineInfrastructure:
+      templateRef:
+        kind: Metal3MachineTemplate
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        name: lennart-metal3-flatcar-v0.1.0
+  infrastructure:
+    templateRef:
+      apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+      kind: Metal3ClusterTemplate
+      name: lennart-metal3-flatcar-v0.1.0
+  workers:
+    machineDeployments:
+    - class: default-worker
+      bootstrap:
+        templateRef:
+          apiVersion: bootstrap.cluster.x-k8s.io/v1beta2
+          kind: KubeadmConfigTemplate
+          name: lennart-metal3-flatcar-v0.1.0-default-worker
+      infrastructure:
+        templateRef:
+          apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+          kind: Metal3MachineTemplate
+          name: lennart-metal3-flatcar-v0.1.0-default-worker
+
+  variables:
+  - name: controlPlaneEndpoint
+    required: false
+    schema:
+      openAPIV3Schema:
+        type: object
+        description: "The control plane endpoint configuration"
+        properties:
+          host:
+            type: string
+            description: "The host IP address for the control plane endpoint"
+            default: "192.168.222.100"
+          port:
+            type: integer
+            description: "The port number for the control plane endpoint"
+            default: 6443
+
+  - name: imageName
+    required: false
+    schema:
+      openAPIV3Schema:
+        type: string
+        description: |
+          The name of the Flatcar disk image used for provisioning the servers.
+          Unlike the Ubuntu class, the Kubernetes version is NOT baked into the
+          image — it is delivered at boot time via a sysext overlay fetched from
+          extensions.flatcar.org. Set addImageVersion to true only if you
+          maintain versioned Flatcar images yourself.
+        default: "flatcar"
+
+  - name: imageChecksum
+    required: true
+    schema:
+      openAPIV3Schema:
+        type: string
+        example: aab4cbba9707d14c58931f6e9fb75736d5fe3df0f52a4e19c70609e11b5623af
+        description: "The SHA256 checksum of the Flatcar disk image."
+
+  - name: injectKubeVip
+    required: false
+    schema:
+      openAPIV3Schema:
+        type: boolean
+        description: |
+          Deploy a Kube-VIP static pod on control-plane nodes to provide a
+          virtual IP for the API server. Disable only if you use an external
+          load balancer instead.
+        default: true
+
+  - name: users
+    required: false
+    schema:
+      openAPIV3Schema:
+        type: array
+        description: |
+          List of OS users to create on the nodes together with their SSH
+          authorised keys and sudo rules. With the ignition bootstrap format
+          used by this class, entries are rendered as ignition passwd.users
+          records. Use shell /bin/bash (the default Flatcar interactive shell).
+        items:
+          type: object
+          properties:
+            name:
+              type: string
+            sudo:
+              type: string
+            sshAuthorizedKeys:
+              type: array
+              items:
+                type: string
+          required:
+          - name
+
+  - name: workerDataTemplateName
+    required: false
+    schema:
+      openAPIV3Schema:
+        type: string
+        example: test-1-workers-template
+        description: "The name of the Metal3DataTemplate to use for worker nodes."
+
+  - name: controlPlaneDataTemplateName
+    required: false
+    schema:
+      openAPIV3Schema:
+        type: string
+        example: test-1-controlplane-template
+        description: "The name of the Metal3DataTemplate to use for control-plane nodes."
+
+  patches:
+  # ---------------------------------------------------------------------------
+  # Infrastructure patches
+  # ---------------------------------------------------------------------------
+  - name: controlPlaneEndpoint
+    description: "Set the control-plane endpoint host and port on the Metal3Cluster."
+    definitions:
+    - selector:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        kind: Metal3ClusterTemplate
+        matchResources:
+          infrastructureCluster: true
+      jsonPatches:
+      - op: replace
+        path: /spec/template/spec/controlPlaneEndpoint
+        valueFrom:
+          variable: controlPlaneEndpoint
+
+  - name: image
+    description: "Build the Flatcar image URL from imageName."
+    definitions:
+    - selector:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        kind: Metal3MachineTemplate
+        matchResources:
+          controlPlane: true
+      jsonPatches:
+      - op: add
+        path: /spec/template/spec/image/url
+        valueFrom:
+          template: |
+            http://192.168.222.1/{{ .imageName }}.raw
+    - selector:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        kind: Metal3MachineTemplate
+        matchResources:
+          machineDeploymentClass:
+            names:
+            - default-worker
+      jsonPatches:
+      - op: add
+        path: /spec/template/spec/image/url
+        valueFrom:
+          template: |
+            http://192.168.222.1/{{ .imageName }}.raw
+
+  - name: imageChecksum
+    description: "Set the image checksum on all Metal3MachineTemplates."
+    definitions:
+    - selector:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        kind: Metal3MachineTemplate
+        matchResources:
+          controlPlane: true
+      jsonPatches:
+      - op: add
+        path: /spec/template/spec/image/checksum
+        valueFrom:
+          variable: imageChecksum
+    - selector:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        kind: Metal3MachineTemplate
+        matchResources:
+          machineDeploymentClass:
+            names:
+            - default-worker
+      jsonPatches:
+      - op: add
+        path: /spec/template/spec/image/checksum
+        valueFrom:
+          variable: imageChecksum
+
+  # ---------------------------------------------------------------------------
+  # Optional Metal3DataTemplate references
+  # ---------------------------------------------------------------------------
+  - name: controlPlaneDataTemplate
+    enabledIf: "false"
+    description: "Attach a Metal3DataTemplate to control-plane Metal3MachineTemplates."
+    definitions:
+    - selector:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        kind: Metal3MachineTemplate
+        matchResources:
+          controlPlane: true
+      jsonPatches:
+      - op: add
+        path: /spec/template/spec/dataTemplate/name
+        valueFrom:
+          variable: controlPlaneDataTemplateName
+
+  - name: workerDataTemplate
+    enabledIf: "false"
+    description: "Attach a Metal3DataTemplate to worker Metal3MachineTemplates."
+    definitions:
+    - selector:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        kind: Metal3MachineTemplate
+        matchResources:
+          machineDeploymentClass:
+            names:
+            - default-worker
+      jsonPatches:
+      - op: add
+        path: /spec/template/spec/dataTemplate/name
+        valueFrom:
+          variable: workerDataTemplateName
+
+  # ---------------------------------------------------------------------------
+  # Bootstrap user patch
+  # ---------------------------------------------------------------------------
+  - name: users
+    description: "Create OS users with SSH keys and sudo rules via ignition passwd."
+    definitions:
+    - selector:
+        apiVersion: controlplane.cluster.x-k8s.io/v1beta2
+        kind: KubeadmControlPlaneTemplate
+        matchResources:
+          controlPlane: true
+      jsonPatches:
+      - op: add
+        path: /spec/template/spec/kubeadmConfigSpec/users
+        valueFrom:
+          variable: users
+    - selector:
+        apiVersion: bootstrap.cluster.x-k8s.io/v1beta2
+        kind: KubeadmConfigTemplate
+        matchResources:
+          machineDeploymentClass:
+            names:
+            - default-worker
+      jsonPatches:
+      - op: add
+        path: /spec/template/spec/users
+        valueFrom:
+          variable: users
+
+  # ---------------------------------------------------------------------------
+  # Flatcar sysext overlay — ignition containerLinuxConfig
+  #
+  # Injects the full CLC (Container Linux Config) additionalConfig that:
+  #   1. Places a symlink under /etc/extensions/ pointing to the pre-downloaded
+  #      kubernetes sysext raw image in /opt/extensions/.
+  #   2. Drops sysupdate configuration so `systemd-sysupdate -C kubernetes`
+  #      can pull patch-level Kubernetes updates in the background.
+  #   3. Installs /opt/metal3/metadata-shim.sh – a script that reads the
+  #      Metal3 config drive (/media/configdrive/openstack/latest/meta_data.json)
+  #      and appends any missing fields to /run/metadata/flatcar.  This is
+  #      needed because afterburn's OpenStack provider expects a "hostname"
+  #      key in meta_data.json, but Metal3/BMO writes "name" and
+  #      "local-hostname" instead, so COREOS_OPENSTACK_HOSTNAME is never
+  #      set.  The shim also exposes Metal3-specific fields
+  #      (COREOS_METAL3_NAME, COREOS_METAL3_NAMESPACE).
+  #      See: https://github.com/coreos/afterburn/issues/1130
+  #   4. Configures systemd units:
+  #      - systemd-sysupdate.service  – dropin that triggers a k8s sysext update
+  #                                     check and flags a reboot if the image changed
+  #      - update-engine.service      – masked by default (see flatcarDisableAutoUpdate)
+  #      - locksmithd.service         – always masked; use Kured for reboot coordination
+  #      - systemd-sysupdate.timer    – disabled by default; enable for auto patch updates
+  #      - metal3-metadata.service    – runs /opt/metal3/metadata-shim.sh after
+  #                                     coreos-metadata.service to fill in missing fields
+  #      - kubeadm.service            – dropin that ensures containerd, coreos-metadata
+  #                                     and metal3-metadata are ready before kubeadm runs
+  #
+  # The Kubernetes version is taken from the CAPI builtin variables so that
+  # rolling upgrades automatically fetch the correct sysext for each node.
+  # ---------------------------------------------------------------------------
+  - name: flatcarSysextConfig
+    description: "Configure the Flatcar ignition bootstrap with the Kubernetes sysext overlay."
+    definitions:
+    - selector:
+        apiVersion: controlplane.cluster.x-k8s.io/v1beta2
+        kind: KubeadmControlPlaneTemplate
+        matchResources:
+          controlPlane: true
+      jsonPatches:
+      - op: replace
+        path: /spec/template/spec/kubeadmConfigSpec/ignition/containerLinuxConfig/additionalConfig
+        valueFrom:
+          template: |
+            |
+              storage:
+                links:
+                  - path: /etc/extensions/kubernetes.raw
+                    hard: false
+                    target: /opt/extensions/kubernetes/kubernetes-{{ .builtin.controlPlane.version }}-x86-64.raw
+                files:
+                  - path: /etc/sysupdate.kubernetes.d/kubernetes-{{ regexReplaceAll "\\.[0-9]+$" .builtin.controlPlane.version "" }}.conf
+                    mode: 0644
+                    contents:
+                      remote:
+                        url: https://extensions.flatcar.org/extensions/kubernetes/kubernetes-{{ regexReplaceAll "\\.[0-9]+$" .builtin.controlPlane.version "" }}.conf
+                  - path: /etc/sysupdate.d/noop.conf
+                    mode: 0644
+                    contents:
+                      remote:
+                        url: https://extensions.flatcar.org/extensions/noop.conf
+                  - path: /opt/extensions/kubernetes/kubernetes-{{ .builtin.controlPlane.version }}-x86-64.raw
+                    contents:
+                      remote:
+                        url: https://extensions.flatcar.org/extensions/kubernetes/kubernetes-{{ .builtin.controlPlane.version }}-x86-64.raw
+                  - path: /opt/metal3/metadata-shim.sh
+                    mode: 0755
+                    contents:
+                      inline: |
+                        #!/usr/bin/sh
+                        # Metal3 config drive metadata shim for Flatcar.
+                        #
+                        # Afterburn's OpenStack provider reads "hostname" from meta_data.json,
+                        # but Metal3/BMO uses "name" and "local-hostname" instead, so
+                        # COREOS_OPENSTACK_HOSTNAME is never populated.
+                        # This script reads the Metal3 config drive and appends any missing
+                        # fields to /run/metadata/flatcar so they are available to units
+                        # that load it via EnvironmentFile.
+                        #
+                        # See: https://github.com/coreos/afterburn/issues/1130
+
+                        set -e
+
+                        METADATA="/media/configdrive/openstack/latest/meta_data.json"
+                        FLATCAR_META="/run/metadata/flatcar"
+
+                        if [ ! -f "${METADATA}" ]; then
+                          echo "metal3-metadata: no config drive metadata found, skipping" >&2
+                          exit 0
+                        fi
+
+                        # Append key=value only if the key is not already present.
+                        append_if_missing() {
+                          key="$1"; value="$2"
+                          if [ -n "${value}" ] && [ "${value}" != "null" ] && \
+                             ! grep -q "^${key}=" "${FLATCAR_META}" 2>/dev/null; then
+                            echo "${key}=${value}" >> "${FLATCAR_META}"
+                          fi
+                        }
+
+                        # Standard OpenStack fields that afterburn may not have populated
+                        append_if_missing COREOS_OPENSTACK_HOSTNAME \
+                          "$(jq -r '.name // .["local-hostname"] // empty' "${METADATA}" 2>/dev/null)"
+                        append_if_missing COREOS_OPENSTACK_INSTANCE_UUID \
+                          "$(jq -r '.uuid // empty' "${METADATA}" 2>/dev/null)"
+
+                        # Metal3-specific fields
+                        append_if_missing COREOS_METAL3_NAME \
+                          "$(jq -r '.["metal3-name"] // empty' "${METADATA}" 2>/dev/null)"
+                        append_if_missing COREOS_METAL3_NAMESPACE \
+                          "$(jq -r '.["metal3-namespace"] // empty' "${METADATA}" 2>/dev/null)"
+              systemd:
+                units:
+                  - name: systemd-sysupdate.service
+                    dropins:
+                      - name: kubernetes.conf
+                        contents: |
+                          [Service]
+                          ExecStartPre=/usr/bin/sh -c "readlink --canonicalize /etc/extensions/kubernetes.raw > /tmp/kubernetes"
+                          ExecStartPre=/usr/lib/systemd/systemd-sysupdate -C kubernetes update
+                          ExecStartPost=/usr/bin/sh -c "readlink --canonicalize /etc/extensions/kubernetes.raw > /tmp/kubernetes-new"
+                          ExecStartPost=/usr/bin/sh -c "if ! cmp --silent /tmp/kubernetes /tmp/kubernetes-new; then touch /run/reboot-required; fi"
+                  - name: update-engine.service
+                    mask: true
+                  - name: locksmithd.service
+                    mask: true
+                  - name: systemd-sysupdate.timer
+                    enabled: false
+                  - name: metal3-metadata.service
+                    enabled: true
+                    contents: |
+                      [Unit]
+                      Description=Augment Flatcar metadata with Metal3 config drive data
+                      After=coreos-metadata.service media-configdrive.mount
+                      Requires=coreos-metadata.service media-configdrive.mount
+                      [Service]
+                      Type=oneshot
+                      RemainAfterExit=yes
+                      ExecStart=/opt/metal3/metadata-shim.sh
+                      [Install]
+                      WantedBy=multi-user.target
+                  - name: kubeadm.service
+                    enabled: true
+                    dropins:
+                      - name: 10-flatcar.conf
+                        contents: |
+                          [Unit]
+                          Requires=containerd.service coreos-metadata.service metal3-metadata.service
+                          After=containerd.service coreos-metadata.service metal3-metadata.service
+                          [Service]
+                          EnvironmentFile=/run/metadata/flatcar
+
+    - selector:
+        apiVersion: bootstrap.cluster.x-k8s.io/v1beta2
+        kind: KubeadmConfigTemplate
+        matchResources:
+          machineDeploymentClass:
+            names:
+            - default-worker
+      jsonPatches:
+      - op: replace
+        path: /spec/template/spec/ignition/containerLinuxConfig/additionalConfig
+        valueFrom:
+          template: |
+            |
+              storage:
+                links:
+                  - path: /etc/extensions/kubernetes.raw
+                    hard: false
+                    target: /opt/extensions/kubernetes/kubernetes-{{ .builtin.machineDeployment.version }}-x86-64.raw
+                files:
+                  - path: /etc/sysupdate.kubernetes.d/kubernetes-{{ regexReplaceAll "\\.[0-9]+$" .builtin.machineDeployment.version "" }}.conf
+                    mode: 0644
+                    contents:
+                      remote:
+                        url: https://extensions.flatcar.org/extensions/kubernetes/kubernetes-{{ regexReplaceAll "\\.[0-9]+$" .builtin.machineDeployment.version "" }}.conf
+                  - path: /etc/sysupdate.d/noop.conf
+                    mode: 0644
+                    contents:
+                      remote:
+                        url: https://extensions.flatcar.org/extensions/noop.conf
+                  - path: /opt/extensions/kubernetes/kubernetes-{{ .builtin.machineDeployment.version }}-x86-64.raw
+                    contents:
+                      remote:
+                        url: https://extensions.flatcar.org/extensions/kubernetes/kubernetes-{{ .builtin.machineDeployment.version }}-x86-64.raw
+                  - path: /opt/metal3/metadata-shim.sh
+                    mode: 0755
+                    contents:
+                      inline: |
+                        #!/usr/bin/sh
+                        # Metal3 config drive metadata shim for Flatcar.
+                        #
+                        # Afterburn's OpenStack provider reads "hostname" from meta_data.json,
+                        # but Metal3/BMO uses "name" and "local-hostname" instead, so
+                        # COREOS_OPENSTACK_HOSTNAME is never populated.
+                        # This script reads the Metal3 config drive and appends any missing
+                        # fields to /run/metadata/flatcar so they are available to units
+                        # that load it via EnvironmentFile.
+                        #
+                        # See: https://github.com/coreos/afterburn/issues/1130
+
+                        set -e
+
+                        METADATA="/media/configdrive/openstack/latest/meta_data.json"
+                        FLATCAR_META="/run/metadata/flatcar"
+
+                        if [ ! -f "${METADATA}" ]; then
+                          echo "metal3-metadata: no config drive metadata found, skipping" >&2
+                          exit 0
+                        fi
+
+                        # Append key=value only if the key is not already present.
+                        append_if_missing() {
+                          key="$1"; value="$2"
+                          if [ -n "${value}" ] && [ "${value}" != "null" ] && \
+                             ! grep -q "^${key}=" "${FLATCAR_META}" 2>/dev/null; then
+                            echo "${key}=${value}" >> "${FLATCAR_META}"
+                          fi
+                        }
+
+                        # Standard OpenStack fields that afterburn may not have populated
+                        append_if_missing COREOS_OPENSTACK_HOSTNAME \
+                          "$(jq -r '.name // .["local-hostname"] // empty' "${METADATA}" 2>/dev/null)"
+                        append_if_missing COREOS_OPENSTACK_INSTANCE_UUID \
+                          "$(jq -r '.uuid // empty' "${METADATA}" 2>/dev/null)"
+
+                        # Metal3-specific fields
+                        append_if_missing COREOS_METAL3_NAME \
+                          "$(jq -r '.["metal3-name"] // empty' "${METADATA}" 2>/dev/null)"
+                        append_if_missing COREOS_METAL3_NAMESPACE \
+                          "$(jq -r '.["metal3-namespace"] // empty' "${METADATA}" 2>/dev/null)"
+              systemd:
+                units:
+                  - name: systemd-sysupdate.service
+                    dropins:
+                      - name: kubernetes.conf
+                        contents: |
+                          [Service]
+                          ExecStartPre=/usr/bin/sh -c "readlink --canonicalize /etc/extensions/kubernetes.raw > /tmp/kubernetes"
+                          ExecStartPre=/usr/lib/systemd/systemd-sysupdate -C kubernetes update
+                          ExecStartPost=/usr/bin/sh -c "readlink --canonicalize /etc/extensions/kubernetes.raw > /tmp/kubernetes-new"
+                          ExecStartPost=/usr/bin/sh -c "if ! cmp --silent /tmp/kubernetes /tmp/kubernetes-new; then touch /run/reboot-required; fi"
+                  - name: update-engine.service
+                    mask: true
+                  - name: locksmithd.service
+                    mask: true
+                  - name: systemd-sysupdate.timer
+                    enabled: false
+                  - name: metal3-metadata.service
+                    enabled: true
+                    contents: |
+                      [Unit]
+                      Description=Augment Flatcar metadata with Metal3 config drive data
+                      After=coreos-metadata.service media-configdrive.mount
+                      Requires=coreos-metadata.service media-configdrive.mount
+                      [Service]
+                      Type=oneshot
+                      RemainAfterExit=yes
+                      ExecStart=/opt/metal3/metadata-shim.sh
+                      [Install]
+                      WantedBy=multi-user.target
+                  - name: kubeadm.service
+                    enabled: true
+                    dropins:
+                      - name: 10-flatcar.conf
+                        contents: |
+                          [Unit]
+                          Requires=containerd.service coreos-metadata.service metal3-metadata.service
+                          After=containerd.service coreos-metadata.service metal3-metadata.service
+                          [Service]
+                          EnvironmentFile=/run/metadata/flatcar
+
+  # ---------------------------------------------------------------------------
+  # Kube-VIP — control-plane virtual IP
+  #
+  # Writes the kube-vip static-pod manifest to /etc/kubernetes/manifests/ via
+  # the ignition files mechanism (written early, before any service starts).
+  # The sed pre/post commands work around https://github.com/kube-vip/kube-vip/issues/684
+  # where kubeadm init needs super-admin.conf while kube-vip expects admin.conf.
+  # ---------------------------------------------------------------------------
+  - name: controlPlaneKubeVip
+    description: "Deploy Kube-VIP as a static pod and apply the admin.conf path workaround."
+    enabledIf: "{{ .injectKubeVip }}"
+    definitions:
+    - selector:
+        apiVersion: controlplane.cluster.x-k8s.io/v1beta2
+        kind: KubeadmControlPlaneTemplate
+        matchResources:
+          controlPlane: true
+      jsonPatches:
+      - op: add
+        path: /spec/template/spec/kubeadmConfigSpec/preKubeadmCommands
+        valueFrom:
+          template: |
+            - "export COREOS_OPENSTACK_HOSTNAME=${COREOS_OPENSTACK_HOSTNAME%.*}"
+            - "export COREOS_OPENSTACK_INSTANCE_UUID=${COREOS_OPENSTACK_INSTANCE_UUID}"
+            - "envsubst '${COREOS_OPENSTACK_HOSTNAME} ${COREOS_OPENSTACK_INSTANCE_UUID}' < /etc/kubeadm.yml > /etc/kubeadm.yml.tmp"
+            - "mv /etc/kubeadm.yml.tmp /etc/kubeadm.yml"
+            # See https://github.com/kube-vip/kube-vip/issues/684
+            - "sed -i 's#path: /etc/kubernetes/admin.conf#path: /etc/kubernetes/super-admin.conf#' /etc/kubernetes/manifests/kube-vip.yaml"
+      - op: add
+        path: /spec/template/spec/kubeadmConfigSpec/postKubeadmCommands
+        valueFrom:
+          template: |
+            # See https://github.com/kube-vip/kube-vip/issues/684
+            - "sed -i 's#path: /etc/kubernetes/super-admin.conf#path: /etc/kubernetes/admin.conf#' /etc/kubernetes/manifests/kube-vip.yaml"
+      - op: add
+        path: /spec/template/spec/kubeadmConfigSpec/files
+        valueFrom:
+          template: |
+            - content: |
+                apiVersion: v1
+                kind: Pod
+                metadata:
+                  name: kube-vip
+                  namespace: kube-system
+                spec:
+                  containers:
+                  - args:
+                    - manager
+                    env:
+                    - name: vip_arp
+                      value: "true"
+                    - name: port
+                      value: "{{ .controlPlaneEndpoint.port }}"
+                    - name: vip_nodename
+                      valueFrom:
+                        fieldRef:
+                          fieldPath: spec.nodeName
+                    - name: vip_interface
+                      value: enp1s0
+                    - name: vip_subnet
+                      value: "32"
+                    - name: dns_mode
+                      value: first
+                    - name: cp_enable
+                      value: "true"
+                    - name: cp_namespace
+                      value: kube-system
+                    - name: vip_leaderelection
+                      value: "true"
+                    - name: vip_leasename
+                      value: plndr-cp-lock
+                    - name: vip_leaseduration
+                      value: "5"
+                    - name: vip_renewdeadline
+                      value: "3"
+                    - name: vip_retryperiod
+                      value: "1"
+                    - name: address
+                      value: {{ .controlPlaneEndpoint.host }}
+                    - name: prometheus_server
+                      value: :2112
+                    image: ghcr.io/kube-vip/kube-vip:v1.0.0
+                    imagePullPolicy: IfNotPresent
+                    name: kube-vip
+                    securityContext:
+                      capabilities:
+                        add:
+                        - NET_ADMIN
+                        - NET_RAW
+                        drop:
+                        - ALL
+                    volumeMounts:
+                    - mountPath: /etc/kubernetes/admin.conf
+                      name: kubeconfig
+                  hostAliases:
+                  - hostnames:
+                    - kubernetes
+                    ip: 127.0.0.1
+                  hostNetwork: true
+                  volumes:
+                  - hostPath:
+                      path: /etc/kubernetes/admin.conf
+                    name: kubeconfig
+              path: /etc/kubernetes/manifests/kube-vip.yaml
+              owner: root:root
+              permissions: '0644'

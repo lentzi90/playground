@@ -55,6 +55,7 @@ kubectl create namespace baremetal-operator-system
 
 # If you want to use ClusterClasses
 export CLUSTER_TOPOLOGY=true
+export EXP_KUBEADM_BOOTSTRAP_FORMAT_IGNITION=true
 
 clusterctl init --infrastructure=metal3 --ipam=metal3
 kubectl apply -k "${REPO_ROOT}/Metal3/irso"

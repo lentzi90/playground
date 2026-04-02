@@ -1,0 +1,29 @@
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: Metal3MachineTemplate
+metadata:
+  name: lennart-metal3-flatcar-v0.1.0
+spec:
+  nodeReuse: false
+  template:
+    spec:
+      automatedCleaningMode: metadata
+      image:
+        checksum: http://192.168.222.1/flatcar_production_openstack_image.raw.sha256sum
+        checksumType: sha256
+        format: raw
+        url: http://192.168.222.1/flatcar_production_openstack_image.raw
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: Metal3MachineTemplate
+metadata:
+  name: lennart-metal3-flatcar-v0.1.0-default-worker
+spec:
+  nodeReuse: false
+  template:
+    spec:
+      automatedCleaningMode: disabled
+      image:
+        checksum: http://192.168.222.1/flatcar_production_openstack_image.raw.sha256sum
+        checksumType: sha256
+        format: raw
+        url: http://192.168.222.1/flatcar_production_openstack_image.raw
