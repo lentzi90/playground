@@ -261,9 +261,11 @@ spec:
   # multiple patches writing to the same JSON path (op: add on files).
   #
   # Includes:
-  #   - Sysext setup script: downloads the Kubernetes sysext image from
-  #     extensions.flatcar.org, repackages it with ID=_any for Ubuntu
-  #     compatibility, and activates it via systemd-sysext refresh.
+  #   - Sysext setup script: referenced from the install-k8s secret, which is
+  #     created from setup-scripts/ubuntu-install-k8s-sysext.sh via kustomize.
+  #     It downloads containerd + Kubernetes sysext images from
+  #     extensions.flatcar.org, repackages them with ID=_any for Ubuntu
+  #     compatibility, and activates them via systemd-sysext refresh.
   #   - Kube-VIP static pod manifest (conditional on injectKubeVip).
   #   - preKubeadmCommands / postKubeadmCommands for sysext + kube-vip.
   # ---------------------------------------------------------------------------
@@ -297,106 +299,13 @@ spec:
         path: /spec/template/spec/kubeadmConfigSpec/files
         valueFrom:
           template: |
-            - path: /opt/sysext/install-k8s-sysext.sh
+            - contentFrom:
+                secret:
+                  key: ubuntu-install-k8s-sysext.sh
+                  name: install-k8s
+              path: /opt/sysext/install-k8s-sysext.sh
               owner: root:root
               permissions: '0755'
-              content: |
-                #!/bin/bash
-                # Install Kubernetes components via systemd-sysext overlay
-                # and set up containerd + required kernel/sysctl prerequisites.
-                #
-                # The Flatcar Kubernetes sysext provides kubeadm, kubectl, kubelet
-                # but NOT containerd (which is part of Flatcar's base OS).
-                # On Ubuntu we install containerd via apt separately.
-                set -euo pipefail
-
-                KUBE_VERSION="${KUBERNETES_VERSION:?KUBERNETES_VERSION must be set}"
-                ARCH="x86-64"
-                BASE_URL="https://extensions.flatcar.org/extensions/kubernetes"
-                KUBE_MAJOR_MINOR="${KUBE_VERSION%.*}"
-
-                echo "==> Setting up Kubernetes ${KUBE_VERSION} on Ubuntu via sysext overlay..."
-
-                # -----------------------------------------------------------
-                # Phase 1: Kernel modules and sysctl prerequisites
-                # -----------------------------------------------------------
-                echo "==> Loading required kernel modules..."
-                modprobe overlay
-                modprobe br_netfilter
-                cat > /etc/modules-load.d/kubernetes.conf <<MODEOF
-                overlay
-                br_netfilter
-                MODEOF
-
-                echo "==> Configuring sysctl for Kubernetes networking..."
-                cat > /etc/sysctl.d/99-kubernetes-cri.conf <<SYSEOF
-                net.bridge.bridge-nf-call-iptables  = 1
-                net.bridge.bridge-nf-call-ip6tables = 1
-                net.ipv4.ip_forward                 = 1
-                SYSEOF
-                sysctl --system
-
-                # -----------------------------------------------------------
-                # Phase 2: Install containerd and squashfs-tools
-                # -----------------------------------------------------------
-                echo "==> Installing containerd and squashfs-tools..."
-                apt-get update -qq
-                apt-get install -y -qq containerd squashfs-tools
-
-                echo "==> Configuring containerd with SystemdCgroup driver..."
-                mkdir -p /etc/containerd
-                containerd config default > /etc/containerd/config.toml
-                sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
-                systemctl restart containerd
-                systemctl enable containerd
-
-                # -----------------------------------------------------------
-                # Phase 3: Kubernetes sysext overlay
-                # -----------------------------------------------------------
-                # Create directories
-                mkdir -p /opt/extensions/kubernetes /etc/extensions
-                mkdir -p /etc/sysupdate.kubernetes.d /etc/sysupdate.d
-
-                # Download the Kubernetes sysext image
-                echo "==> Downloading sysext image kubernetes-${KUBE_VERSION}-${ARCH}.raw ..."
-                curl -fsSL -o "/tmp/kubernetes-${KUBE_VERSION}-${ARCH}.raw" \
-                    "${BASE_URL}/kubernetes-${KUBE_VERSION}-${ARCH}.raw"
-
-                # Repackage with ID=_any for Ubuntu compatibility
-                echo "==> Repackaging sysext image for Ubuntu compatibility..."
-                TMPDIR=$(mktemp -d)
-                unsquashfs -d "${TMPDIR}/extract" "/tmp/kubernetes-${KUBE_VERSION}-${ARCH}.raw"
-
-                RELEASE_DIR="${TMPDIR}/extract/usr/lib/extension-release.d"
-                mkdir -p "${RELEASE_DIR}"
-                rm -f "${RELEASE_DIR}"/extension-release.*
-                echo "ID=_any" > "${RELEASE_DIR}/extension-release.kubernetes"
-
-                mksquashfs "${TMPDIR}/extract" \
-                    "/opt/extensions/kubernetes/kubernetes-${KUBE_VERSION}-${ARCH}.raw" \
-                    -noappend -quiet
-                rm -rf "${TMPDIR}" "/tmp/kubernetes-${KUBE_VERSION}-${ARCH}.raw"
-
-                # Create symlink for systemd-sysext
-                ln -sf "/opt/extensions/kubernetes/kubernetes-${KUBE_VERSION}-${ARCH}.raw" \
-                    /etc/extensions/kubernetes.raw
-
-                # Download sysupdate configs for future patch-level updates
-                echo "==> Downloading sysupdate configs..."
-                curl -fsSL -o "/etc/sysupdate.kubernetes.d/kubernetes-${KUBE_MAJOR_MINOR}.conf" \
-                    "${BASE_URL}/kubernetes-${KUBE_MAJOR_MINOR}.conf" || true
-                curl -fsSL -o /etc/sysupdate.d/noop.conf \
-                    "https://extensions.flatcar.org/extensions/noop.conf" || true
-
-                # Activate the sysext overlay
-                echo "==> Activating sysext overlay..."
-                systemd-sysext refresh
-
-                # Reload systemd and enable kubelet (containerd already running)
-                systemctl daemon-reload
-                systemctl enable kubelet
-
-                echo "==> Kubernetes ${KUBE_VERSION} sysext setup complete."
             {{ if .injectKubeVip }}
             - content: |
                 apiVersion: v1
@@ -486,106 +395,13 @@ spec:
         path: /spec/template/spec/files
         valueFrom:
           template: |
-            - path: /opt/sysext/install-k8s-sysext.sh
+            - contentFrom:
+                secret:
+                  key: ubuntu-install-k8s-sysext.sh
+                  name: install-k8s
+              path: /opt/sysext/install-k8s-sysext.sh
               owner: root:root
               permissions: '0755'
-              content: |
-                #!/bin/bash
-                # Install Kubernetes components via systemd-sysext overlay
-                # and set up containerd + required kernel/sysctl prerequisites.
-                #
-                # The Flatcar Kubernetes sysext provides kubeadm, kubectl, kubelet
-                # but NOT containerd (which is part of Flatcar's base OS).
-                # On Ubuntu we install containerd via apt separately.
-                set -euo pipefail
-
-                KUBE_VERSION="${KUBERNETES_VERSION:?KUBERNETES_VERSION must be set}"
-                ARCH="x86-64"
-                BASE_URL="https://extensions.flatcar.org/extensions/kubernetes"
-                KUBE_MAJOR_MINOR="${KUBE_VERSION%.*}"
-
-                echo "==> Setting up Kubernetes ${KUBE_VERSION} on Ubuntu via sysext overlay..."
-
-                # -----------------------------------------------------------
-                # Phase 1: Kernel modules and sysctl prerequisites
-                # -----------------------------------------------------------
-                echo "==> Loading required kernel modules..."
-                modprobe overlay
-                modprobe br_netfilter
-                cat > /etc/modules-load.d/kubernetes.conf <<MODEOF
-                overlay
-                br_netfilter
-                MODEOF
-
-                echo "==> Configuring sysctl for Kubernetes networking..."
-                cat > /etc/sysctl.d/99-kubernetes-cri.conf <<SYSEOF
-                net.bridge.bridge-nf-call-iptables  = 1
-                net.bridge.bridge-nf-call-ip6tables = 1
-                net.ipv4.ip_forward                 = 1
-                SYSEOF
-                sysctl --system
-
-                # -----------------------------------------------------------
-                # Phase 2: Install containerd and squashfs-tools
-                # -----------------------------------------------------------
-                echo "==> Installing containerd and squashfs-tools..."
-                apt-get update -qq
-                apt-get install -y -qq containerd squashfs-tools
-
-                echo "==> Configuring containerd with SystemdCgroup driver..."
-                mkdir -p /etc/containerd
-                containerd config default > /etc/containerd/config.toml
-                sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
-                systemctl restart containerd
-                systemctl enable containerd
-
-                # -----------------------------------------------------------
-                # Phase 3: Kubernetes sysext overlay
-                # -----------------------------------------------------------
-                # Create directories
-                mkdir -p /opt/extensions/kubernetes /etc/extensions
-                mkdir -p /etc/sysupdate.kubernetes.d /etc/sysupdate.d
-
-                # Download the Kubernetes sysext image
-                echo "==> Downloading sysext image kubernetes-${KUBE_VERSION}-${ARCH}.raw ..."
-                curl -fsSL -o "/tmp/kubernetes-${KUBE_VERSION}-${ARCH}.raw" \
-                    "${BASE_URL}/kubernetes-${KUBE_VERSION}-${ARCH}.raw"
-
-                # Repackage with ID=_any for Ubuntu compatibility
-                echo "==> Repackaging sysext image for Ubuntu compatibility..."
-                TMPDIR=$(mktemp -d)
-                unsquashfs -d "${TMPDIR}/extract" "/tmp/kubernetes-${KUBE_VERSION}-${ARCH}.raw"
-
-                RELEASE_DIR="${TMPDIR}/extract/usr/lib/extension-release.d"
-                mkdir -p "${RELEASE_DIR}"
-                rm -f "${RELEASE_DIR}"/extension-release.*
-                echo "ID=_any" > "${RELEASE_DIR}/extension-release.kubernetes"
-
-                mksquashfs "${TMPDIR}/extract" \
-                    "/opt/extensions/kubernetes/kubernetes-${KUBE_VERSION}-${ARCH}.raw" \
-                    -noappend -quiet
-                rm -rf "${TMPDIR}" "/tmp/kubernetes-${KUBE_VERSION}-${ARCH}.raw"
-
-                # Create symlink for systemd-sysext
-                ln -sf "/opt/extensions/kubernetes/kubernetes-${KUBE_VERSION}-${ARCH}.raw" \
-                    /etc/extensions/kubernetes.raw
-
-                # Download sysupdate configs for future patch-level updates
-                echo "==> Downloading sysupdate configs..."
-                curl -fsSL -o "/etc/sysupdate.kubernetes.d/kubernetes-${KUBE_MAJOR_MINOR}.conf" \
-                    "${BASE_URL}/kubernetes-${KUBE_MAJOR_MINOR}.conf" || true
-                curl -fsSL -o /etc/sysupdate.d/noop.conf \
-                    "https://extensions.flatcar.org/extensions/noop.conf" || true
-
-                # Activate the sysext overlay
-                echo "==> Activating sysext overlay..."
-                systemd-sysext refresh
-
-                # Reload systemd and enable kubelet (containerd already running)
-                systemctl daemon-reload
-                systemctl enable kubelet
-
-                echo "==> Kubernetes ${KUBE_VERSION} sysext setup complete."
       - op: add
         path: /spec/template/spec/preKubeadmCommands
         valueFrom:
