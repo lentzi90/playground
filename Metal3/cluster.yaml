@@ -9,8 +9,8 @@ spec:
     classRef:
       name: lennart-metal3-v0.1.0
       namespace: default
-    version: v1.35.2
-    # version: v1.32.13
+    # version: v1.35.2
+    version: v1.32.13
     variables:
     - name: controlPlaneEndpoint
       value:
