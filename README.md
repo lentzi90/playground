@@ -88,16 +88,18 @@ Create a cluster using the upstream ClusterClass and image template.
 # Set variables
 source CAPO/.env
 # Apply the clusterclass
-clusterctl generate yaml --from https://github.com/kubernetes-sigs/cluster-api-provider-openstack/releases/download/v0.14.0/clusterclass-dev-test.yaml | kubectl apply -f -
+clusterctl generate yaml --from https://github.com/kubernetes-sigs/cluster-api-provider-openstack/releases/download/v0.15.0-alpha.0/clusterclass-dev-test.yaml | kubectl apply -f -
 # If the openstack cloud does not support qcow2, download the image and convert.
 wget https://stable.release.flatcar-linux.net/amd64-usr/current/flatcar_production_openstack_image.img
 qemu-img convert -f qcow2 -O raw flatcar_production_openstack_image.img flatcar_production.raw
 openstack image create --file flatcar_production.raw flatcar_production
 # Now we can apply the image template. It will pick up the existing image, or download as needed.
-clusterctl generate yaml --from https://github.com/kubernetes-sigs/cluster-api-provider-openstack/releases/download/v0.14.0/image-template-node.yaml | sed s/qcow2/raw/ | kubectl apply -f -
+clusterctl generate yaml --from https://github.com/kubernetes-sigs/cluster-api-provider-openstack/releases/download/v0.15.0-alpha.0/image-template-node.yaml | sed s/qcow2/raw/ | kubectl apply -f -
 
 # Create a cluster
-clusterctl generate cluster lennart-test --kubernetes-version=v1.35.0 --flavor=topology | kubectl apply -f -
+clusterctl generate cluster lennart-test --kubernetes-version=v1.35.6 --flavor=topology | kubectl apply -f -
+# Label it for the ClusterResourceSets
+kubectl label cluster lennart-test cni=calico cloud=openstack
 ```
 
 ### CNI and external cloud provider

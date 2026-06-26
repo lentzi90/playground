@@ -10,7 +10,7 @@ spec:
     classRef:
       name: lennart-openstack-v0.1.0
       namespace: default
-    version: v1.35.0
+    version: v1.35.6
     variables:
     - name: identityRef
       value:
@@ -35,7 +35,7 @@ spec:
     - name: allowedCIDRs
       value:
       - 10.6.0.0/24
-      - 85.134.18.87/32
+      - 62.72.228.44/32
     workers:
       machineDeployments:
       - class: default-worker
