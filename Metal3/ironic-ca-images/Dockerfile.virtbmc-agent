@@ -1,0 +1,29 @@
+# Bakes Ironic's CA certificate into the KubeVirtBMC virtbmc agent image, so
+# the agent's own outbound HTTPS requests (e.g. GetRemoteFileSize) trust
+# Ironic's cert-manager-issued certificate without needing SSL_CERT_FILE or
+# any other env var/volume injection.
+#
+# The final image is distroless/static (no shell, no update-ca-certificates),
+# so the merged CA bundle is built in a throwaway alpine stage and copied
+# directly over the final image's bundle file. This works because Go's
+# pure-Go x509.SystemCertPool() on Linux always reads well-known OS
+# trust-store paths (including /etc/ssl/certs/ca-certificates.crt) without
+# needing cgo or an OS API call.
+#
+# Build:
+#   docker build -f Dockerfile.virtbmc-agent \
+#     --build-arg VIRTBMC_AGENT_IMAGE=kubevirtbmc/virtbmc:v0.9.0 \
+#     -t kubevirtbmc/virtbmc:v0.9.0-ironic-ca .
+#
+# The ironic-ca.crt build context file can be extracted from the live
+# ironic-ca-cert ConfigMap:
+#   kubectl get configmap ironic-ca-cert -o jsonpath='{.data.tls\.crt}' > ironic-ca.crt
+ARG VIRTBMC_AGENT_IMAGE=kubevirtbmc/virtbmc:v0.9.0
+
+FROM alpine:3.20 AS certbuilder
+RUN apk add --no-cache ca-certificates
+COPY ironic-ca.crt /usr/local/share/ca-certificates/ironic-ca.crt
+RUN update-ca-certificates
+
+FROM ${VIRTBMC_AGENT_IMAGE}
+COPY --from=certbuilder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt

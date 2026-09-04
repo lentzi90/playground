@@ -1,0 +1,74 @@
+# kubevirt-baremetal-network.yaml
+#
+# A Multus NetworkAttachmentDefinition backed by the plain CNI "bridge"
+# plugin, giving KubeVirt VMs a *second* NIC that sits on a real Linux
+# bridge (a genuine shared L2/broadcast domain) instead of Kind's default
+# pod network (kindnet), which is a point-to-point veth+route mesh with NO
+# L2 broadcast domain at all.
+#
+# Why this exists
+# ----------------
+# The default "pod" network (still used on eth0/net "default", see
+# create-kubevirt-bmhs.sh) is required for provisioning: it's how VMs reach
+# Ironic, the in-cluster image server, and the KubeVirtBMC agent before the
+# workload cluster exists. But it CANNOT support ARP-based virtual-IP
+# failover (e.g. kube-vip): gratuitous ARP broadcasts don't propagate beyond
+# a pod's own point-to-point veth, and the Kind node's root-netns routing
+# table has no route for a floating/unclaimed IP, so nothing ever redirects
+# traffic to whichever VM currently holds a VIP. This was empirically
+# verified (100% packet loss to a GARP-announced floating IP on the default
+# pod network).
+#
+# This second network ("baremetal-net") uses the CNI "bridge" plugin, which
+# creates a real Linux bridge (br-baremetal) on the Kind node. All VMs
+# attached to it (via KubeVirt's "bridge" interface binding, see
+# create-kubevirt-bmhs.sh) are genuinely on the same L2 segment — same as a
+# real rack of servers on a switched network. Gratuitous ARP-based VIP
+# failover (kube-vip, ARP mode) was verified to work correctly on this kind
+# of network (immediate 0%-loss reachability, and correct failover redirect
+# after the VIP moved and a new GARP was sent).
+#
+# `isGateway: true` gives the Kind node's root netns an address on the
+# bridge (192.168.100.1), which is what lets pods in the *management*
+# cluster (e.g. CAPI controllers, still on the default pod network) reach
+# VMs on this bridge network at all: management-cluster pods already
+# default-route everything through the Kind node's root netns, which will
+# now have a directly-connected route to 192.168.100.0/24.
+#
+# IMPORTANT — one-time host prerequisite:
+#   Kind node images do not ship the "bridge" CNI plugin binary (only
+#   kindnet's own ptp/host-local/loopback/portmap). dev-setup-kubevirtbmc.sh
+#   downloads it from the containernetworking/plugins release and
+#   `docker cp`s it into /opt/cni/bin on the Kind node before applying this
+#   manifest.
+#
+# Address plan (192.168.100.0/24 — disjoint from every other CIDR in use:
+# management pod CIDR 10.244.0.0/16, management service CIDR 10.96.0.0/12,
+# workload service CIDR 10.128.0.0/12, workload pod CIDR 192.168.0.0/18):
+#   192.168.100.1         — Kind node root netns (bridge gateway, via isGateway)
+#   192.168.100.10-.90    — VM interfaces (host-local IPAM range)
+#   192.168.100.100       — floating VIP for the workload cluster's API
+#                           server (kube-vip, ARP mode) — NOT part of the
+#                           IPAM range so it's never handed to a real VM
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: baremetal-net
+  namespace: default
+spec:
+  config: |
+    {
+      "cniVersion": "0.3.1",
+      "type": "bridge",
+      "bridge": "br-baremetal",
+      "isGateway": true,
+      "isDefaultGateway": false,
+      "ipMasq": false,
+      "hairpinMode": true,
+      "ipam": {
+        "type": "host-local",
+        "subnet": "192.168.100.0/24",
+        "rangeStart": "192.168.100.10",
+        "rangeEnd": "192.168.100.90"
+      }
+    }

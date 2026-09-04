@@ -1,0 +1,35 @@
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: Metal3MachineTemplate
+metadata:
+  name: kubevirt-test-1-controlplane
+  namespace: default
+spec:
+  nodeReuse: false
+  template:
+    spec:
+      automatedCleaningMode: metadata
+      dataTemplate:
+        name: kubevirt-test-1-controlplane-template
+      image:
+        checksum: http://10.96.200.200:8080/ubuntu-2404.img.sha256sum
+        checksumType: sha256
+        format: qcow2
+        url: http://10.96.200.200:8080/ubuntu-2404.img
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: Metal3MachineTemplate
+metadata:
+  name: kubevirt-test-1-workers
+  namespace: default
+spec:
+  nodeReuse: false
+  template:
+    spec:
+      automatedCleaningMode: disabled
+      dataTemplate:
+        name: kubevirt-test-1-workers-template
+      image:
+        checksum: http://10.96.200.200:8080/ubuntu-2404.img.sha256sum
+        checksumType: sha256
+        format: qcow2
+        url: http://10.96.200.200:8080/ubuntu-2404.img

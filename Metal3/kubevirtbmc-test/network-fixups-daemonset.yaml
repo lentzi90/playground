@@ -1,0 +1,91 @@
+# network-fixups-daemonset.yaml
+#
+# Applies two host-level networking fixups on every Kind node, both required
+# for the KubeVirtBMC + Metal3 dev setup (see kubevirtbmc-e2e-results.md,
+# Key Design Decisions 3 and 7, and the Troubleshooting table):
+#
+#   1. proxy_arp on veth interfaces — with KubeVirt bridge networking in
+#      Kind, VMs get a pod-subnet IP via DHCP but see the entire /24 as
+#      directly connected. Return traffic to other pods fails because the
+#      host veth doesn't proxy-ARP by default, so pod-to-VM connectivity
+#      breaks without this.
+#   2. rp_filter loosening — kube-vip's VIP on baremetal-net introduces
+#      asymmetric routing: management-cluster pods reach the VIP via
+#      br-baremetal, but the VM's response routes out its other NIC (the pod
+#      network's default route). Kind's default rp_filter=1 (strict) would
+#      drop that as spoofed, so it's loosened to 2 (loose mode).
+#
+# Both the default (for interfaces created after this DaemonSet starts) and
+# all existing veth interfaces are covered, polling every 5s to catch veths
+# created later (e.g. when new VMs/pods are scheduled).
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: network-fixups
+  namespace: kube-system
+  labels:
+    app: network-fixups
+    component: networking
+spec:
+  selector:
+    matchLabels:
+      app: network-fixups
+  template:
+    metadata:
+      labels:
+        app: network-fixups
+        component: networking
+    spec:
+      hostNetwork: true
+      hostPID: true
+      priorityClassName: system-node-critical
+      terminationGracePeriodSeconds: 5
+      tolerations:
+      - operator: Exists
+      containers:
+      - name: network-fixups
+        image: busybox:1.36
+        command: ["/bin/sh", "-c"]
+        args:
+        - |
+          set -e
+          echo "network-fixups starting on $(hostname)"
+
+          # Make new interfaces inherit the right settings from birth.
+          echo 1 > /proc/sys/net/ipv4/conf/default/proxy_arp
+          echo 2 > /proc/sys/net/ipv4/conf/default/rp_filter
+          echo 2 > /proc/sys/net/ipv4/conf/all/rp_filter
+
+          while true; do
+            for veth in $(ls /proc/sys/net/ipv4/conf/ 2>/dev/null | grep '^veth'); do
+              arp_val=$(cat /proc/sys/net/ipv4/conf/${veth}/proxy_arp 2>/dev/null || echo "")
+              if [ "${arp_val}" = "0" ]; then
+                echo 1 > /proc/sys/net/ipv4/conf/${veth}/proxy_arp
+                echo "[$(date -u +%H:%M:%S)] Enabled proxy_arp on ${veth}"
+              fi
+              rp_val=$(cat /proc/sys/net/ipv4/conf/${veth}/rp_filter 2>/dev/null || echo "")
+              if [ "${rp_val}" = "1" ]; then
+                echo 2 > /proc/sys/net/ipv4/conf/${veth}/rp_filter
+                echo "[$(date -u +%H:%M:%S)] Loosened rp_filter on ${veth}"
+              fi
+            done
+            sleep 5
+          done
+        securityContext:
+          privileged: true
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            cpu: 50m
+            memory: 32Mi
+        volumeMounts:
+        - name: proc
+          mountPath: /proc
+      volumes:
+      - name: proc
+        hostPath:
+          path: /proc
+  updateStrategy:
+    type: RollingUpdate

@@ -1,0 +1,17 @@
+---
+# ClusterResourceSet that applies Calico CNI to any cluster labeled cni=calico.
+# The actual Calico manifest lives in the calico-cni ConfigMap built from
+# /tmp/calico.yaml (already patched for podCIDR 192.168.0.0/18).
+apiVersion: addons.cluster.x-k8s.io/v1beta2
+kind: ClusterResourceSet
+metadata:
+  name: calico-cni
+  namespace: default
+spec:
+  clusterSelector:
+    matchLabels:
+      cni: calico
+  strategy: ApplyOnce
+  resources:
+  - name: calico-cni
+    kind: ConfigMap
