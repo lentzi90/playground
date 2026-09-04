@@ -1,27 +1,24 @@
 #!/usr/bin/env bash
 
-set -ux
+set -eux
 
-NUM_BMH=${NUM_BMH:-"5"}
+NUM_BMH=${NUM_BMH:-"2"}
 
 REPO_ROOT=$(realpath "$(dirname "${BASH_SOURCE[0]}")/..")
 cd "${REPO_ROOT}" || exit 1
 
-# Delete all BMHs
 for ((i=0; i<NUM_BMH; i++))
 do
-  VM_NAME="bmo-e2e-${i}"
-  kubectl annotate bmh "${VM_NAME}" baremetalhost.metal3.io/detached="deleting-vm"
-  kubectl wait --for=jsonpath='{.status.operationalStatus}'=detached "bmh/${VM_NAME}"
-  kubectl delete bmh "${VM_NAME}"
+  VM_NAME="kubevirt-node-${i}"
+  echo "Deleting ${VM_NAME}..."
+  kubectl delete bmh "${VM_NAME}" --ignore-not-found
+  kubectl delete virtualmachinebmc "${VM_NAME}-bmc" --ignore-not-found
+  kubectl delete vm "${VM_NAME}" --ignore-not-found
+  kubectl delete pvc "${VM_NAME}-rootdisk" --ignore-not-found
 done
 
-# Delete all VMs
-for ((i=0; i<NUM_BMH; i++))
-do
-  VM_NAME="bmo-e2e-${i}"
-  # Stop the VM if it's running
-  virsh -c qemu:///system destroy --domain "${VM_NAME}"
-  # Delete the VM and its storage
-  virsh -c qemu:///system undefine --domain "${VM_NAME}" --remove-all-storage --nvram
-done
+rm -rf "${REPO_ROOT}/Metal3/tmp"
+
+echo "Cleanup complete"
+kubectl get vm 2>/dev/null || true
+kubectl get bmh 2>/dev/null || true

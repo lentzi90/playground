@@ -169,50 +169,59 @@ sha256 output/ubuntu-2404-kube-v1.31.1/ubuntu-2404-kube-v1.31.1.raw
 
 ## Metal3
 
-```bash
-# Download disk image
-wget -O Metal3/images/ubuntu-2404.img https://cloud-images.ubuntu.com/releases/noble/release/ubuntu-24.04-server-cloudimg-amd64.img
-wget -O Metal3/images/centos-stream-10.img https://cloud.centos.org/centos/10-stream/x86_64/images/CentOS-Stream-GenericCloud-x86_64-10-latest.x86_64.qcow2
-# Convert to raw
-qemu-img convert -f qcow2 -O raw Metal3/images/ubuntu-2404.img Metal3/images/ubuntu-2404.raw
-qemu-img convert -f qcow2 -O raw Metal3/images/centos-stream-10.img Metal3/images/centos-stream-10.raw
-# Calculate checksums
-pushd Metal3/images
-sha256sum ubuntu-2404.raw > ubuntu-2404.raw.sha256sum
-sha256sum centos-stream-10.raw > centos-stream-10.raw.sha256sum
-popd
+The Metal3 dev lab uses [KubeVirt](https://kubevirt.io/) VMs as simulated
+bare-metal hosts, with [KubeVirtBMC](https://github.com/kubevirtbmc/kubevirtbmc)
+providing the Redfish BMC in front of each VM.
 
+Create the bootstrap/management Kind cluster with the prerequisites that
+`Metal3/dev-setup.sh` expects already in place (KubeVirt, CDI, cert-manager):
+
+```bash
+kind create cluster --config Metal3/kind.yaml
+
+# Install KubeVirt and enable the DeclarativeHotplugVolumes feature gate
+export KUBEVIRT_VERSION="${KUBEVIRT_VERSION:-v1.9.0}"
+kubectl apply -f "https://github.com/kubevirt/kubevirt/releases/download/${KUBEVIRT_VERSION}/kubevirt-operator.yaml"
+kubectl apply -f "https://github.com/kubevirt/kubevirt/releases/download/${KUBEVIRT_VERSION}/kubevirt-cr.yaml"
+kubectl patch kubevirt kubevirt -n kubevirt --type=merge \
+  -p '{"spec":{"configuration":{"developerConfiguration":{"featureGates":["DeclarativeHotplugVolumes"]}}}}'
+kubectl -n kubevirt wait kv/kubevirt --for=condition=Available --timeout=300s
+
+# Install CDI (dev-setup.sh patches the StorageProfile for local-path storage)
+export CDI_VERSION="${CDI_VERSION:-v1.66.1}"
+kubectl apply -f "https://github.com/kubevirt/containerized-data-importer/releases/download/${CDI_VERSION}/cdi-operator.yaml"
+kubectl apply -f "https://github.com/kubevirt/containerized-data-importer/releases/download/${CDI_VERSION}/cdi-cr.yaml"
+
+# Install cert-manager (used to issue Ironic's TLS certificate)
+kubectl apply -f "https://github.com/cert-manager/cert-manager/releases/latest/download/cert-manager.yaml"
+kubectl -n cert-manager wait --for=condition=Available --timeout=300s deployment --all
+
+kubectl apply -f Metal3/kubevirtbmc-test/network-fixups-daemonset.yaml
+```
+
+Then run the rest of the setup:
+
+```bash
 ./Metal3/dev-setup.sh
-# Wait for BMO to come up
-# Create BMHs backed by VMs
-NUM_BMH=5 ./Metal3/create-bmhs.sh
-# (Optional) Apply ClusterResourceSets
-kubectl apply --server-side -k ClusterResourceSets
-# Apply setup-scripts for installing k8s on plain images
-kubectl apply -k setup-scripts
-# Apply cluster
+
+# Render Calico (derived from the shared ClusterResourceSets/calico base,
+# see Metal3/cluster-resource-sets/calico/kustomization.yaml) into the
+# ConfigMap input file
+kustomize build Metal3/cluster-resource-sets/calico > Metal3/cluster-resource-sets/calico.yaml
+# Apply the ClusterResourceSet(s), kept separate from the Cluster API
+# resources, mirroring the top-level ClusterResourceSets/CAPO split above
+kubectl apply --server-side -k Metal3/cluster-resource-sets
+NUM_BMH=2 ./Metal3/create-bmhs.sh
 kubectl apply -k Metal3/cluster
-
-# Get the kubeconfig for the workload cluster
-clusterctl get kubeconfig test-1 > kubeconfig.yaml
 ```
 
-Add CNI to make nodes healthy (only needed if you didn't apply the CRS):
-
-```bash
-kubectl --kubeconfig=kubeconfig.yaml apply -k ClusterResourceSets/calico
-```
-
-### Metal3 cluster-class
-
-```bash
-# (Optional) Apply ClusterResourceSets
-kubectl apply --server-side -k ClusterResourceSets
-# Apply ClusterClass
-kubectl apply -k ClusterClasses/metal3-class
-# Create Cluster
-kubectl apply -f Metal3/cluster.yaml
-```
+> [!NOTE]
+> The `ClusterClasses/metal3-*-class` ClusterClasses and the old
+> `Metal3/cluster.yaml`/`cluster-flatcar.yaml`/`cluster-ubuntu.yaml` single-file
+> Cluster manifests were tied to the removed libvirt network
+> (`192.168.222.0/24`) and were removed/are stale. They would need to be
+> ported to the new `baremetal-net` addressing (`192.168.100.0/24`) and the
+> in-cluster image server before reuse with this lab.
 
 ### Move from bootstrap to management cluster
 

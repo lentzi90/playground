@@ -1,0 +1,19 @@
+# Bakes Ironic's CA certificate into CDI's importer image, so DataVolume
+# imports over HTTPS trust Ironic's cert-manager-issued certificate without
+# needing spec.source.http.certConfigMap on every DataVolume.
+#
+# Base image is CentOS Stream 9 and already ships update-ca-trust.
+#
+# Build:
+#   docker build -f Dockerfile.cdi-importer \
+#     --build-arg CDI_IMPORTER_IMAGE=quay.io/kubevirt/cdi-importer:v1.65.0 \
+#     -t cdi-importer:ironic-ca .
+#
+# The ironic-ca.crt build context file can be extracted from the live
+# ironic-ca-cert ConfigMap:
+#   kubectl get configmap ironic-ca-cert -o jsonpath='{.data.tls\.crt}' > ironic-ca.crt
+ARG CDI_IMPORTER_IMAGE=quay.io/kubevirt/cdi-importer:v1.65.0
+FROM ${CDI_IMPORTER_IMAGE}
+COPY ironic-ca.crt /etc/pki/ca-trust/source/anchors/ironic-ca.crt
+USER root
+RUN update-ca-trust extract

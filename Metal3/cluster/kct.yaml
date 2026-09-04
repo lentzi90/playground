@@ -1,7 +1,7 @@
 apiVersion: bootstrap.cluster.x-k8s.io/v1beta2
 kind: KubeadmConfigTemplate
 metadata:
-  name: test-1-workers
+  name: kubevirt-test-1-workers
   namespace: default
 spec:
   template:
@@ -10,15 +10,12 @@ spec:
       - contentFrom:
           secret:
             key: ubuntu-install-k8s-release-artifacts.sh
-            # key: centos-install-k8s-release-artifacts.sh
-            # key: ubuntu-install-k8s.sh
-            # key: ubuntu-sysext-k8s.sh
             name: install-k8s
-        path: /tmp/install-k8s.sh
+        path: /usr/local/bin/install-k8s.sh
         owner: root:root
         permissions: '0755'
       preKubeadmCommands:
-      - /tmp/install-k8s.sh
+      - /usr/local/bin/install-k8s.sh
       joinConfiguration:
         nodeRegistration:
           name: '{{ ds.meta_data.name }}'
@@ -30,3 +27,4 @@ spec:
         sudo: 'ALL=(ALL) NOPASSWD:ALL'
         sshAuthorizedKeys:
         - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOxg0/L9LWM8K6//pe5OYc7SK4vv6676uz6VRJGA44nl lennart
+        - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDD8VQjOYqKP/OSkvGquFjaUwaiAtKYKVv5l7ThGGuYg ubuntu@lennart-capo-upgrade

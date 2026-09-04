@@ -1,0 +1,36 @@
+# Derives this lab's Calico manifest from the shared, top-level
+# ../../../ClusterResourceSets/calico base (same upstream manifest/version
+# used by every other cluster in this repo) instead of vendoring a separate,
+# pinned copy of Calico just for the Metal3/KubeVirt lab.
+#
+# The only thing this lab needs on top of the shared base is one env var on
+# the calico-node DaemonSet: with KubeVirt bridge networking, workload nodes
+# have two NICs (the pod network and baremetal-net), and Calico's default
+# IP-autodetection sometimes picks baremetal-net instead of the pod network,
+# which breaks cross-node pod traffic. Pinning autodetection to the pod
+# network's CIDR (10.244.0.0/16, Kind's default pod-network range) fixes
+# this. See "Key design decisions" in ../../README.md and the
+# troubleshooting table in ../../troubleshooting.md.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- ../../../ClusterResourceSets/calico
+
+patches:
+- target:
+    kind: DaemonSet
+    name: calico-node
+  patch: |-
+    apiVersion: apps/v1
+    kind: DaemonSet
+    metadata:
+      name: calico-node
+    spec:
+      template:
+        spec:
+          containers:
+          - name: calico-node
+            env:
+            - name: IP_AUTODETECTION_METHOD
+              value: cidr=10.244.0.0/16

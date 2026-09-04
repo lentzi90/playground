@@ -4,16 +4,10 @@ metadata:
   name: ironic
   namespace: baremetal-operator-system
 spec:
-  networking:
-    dhcp:
-      gatewayAddress: "192.168.222.1"
-      dnsAddress: "192.168.222.1"
-      rangeBegin: "192.168.222.5"
-      rangeEnd: "192.168.222.199"
-      networkCIDR: "192.168.222.0/24"
-    interface: "eth0"
-    ipAddress: "192.168.222.2"
-    ipAddressManager: "keepalived"
+  # No DHCP needed — KubeVirt VMs get IPs from the masquerade network.
+  # No keepalived needed — we rely on the auto-detected hostIP.
+  # No explicit ipAddress or interface — IRSO will use status.hostIP.
+  networking: {}
   tls:
     certificateName: ironic-cert
   deployRamdisk:

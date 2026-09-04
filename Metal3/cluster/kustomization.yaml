@@ -9,4 +9,3 @@ resources:
 - metal3machinetemplate.yaml
 - machinedeployment.yaml
 - metal3datatemplate.yaml
-- ippool.yaml

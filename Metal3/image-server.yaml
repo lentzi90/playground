@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: image-server
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: image-server
+  template:
+    metadata:
+      labels:
+        app: image-server
+    spec:
+      containers:
+      - name: nginx
+        image: nginxinc/nginx-unprivileged:latest
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: images
+          mountPath: /usr/share/nginx/html
+          readOnly: true
+      volumes:
+      - name: images
+        hostPath:
+          path: /tmp/metal3-images
+          type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: image-server
+  namespace: default
+spec:
+  clusterIP: 10.96.200.200
+  selector:
+    app: image-server
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
