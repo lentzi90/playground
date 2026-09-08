@@ -12,13 +12,13 @@
 #
 # Build:
 #   docker build -f Dockerfile.virtbmc-agent \
-#     --build-arg VIRTBMC_AGENT_IMAGE=kubevirtbmc/virtbmc:v0.9.0 \
-#     -t kubevirtbmc/virtbmc:v0.9.0-ironic-ca .
+#     --build-arg VIRTBMC_AGENT_IMAGE=kubevirtbmc/virtbmc:v0.10.0 \
+#     -t kubevirtbmc/virtbmc:v0.10.0-ironic-ca .
 #
 # The ironic-ca.crt build context file can be extracted from the live
 # ironic-ca-cert ConfigMap:
 #   kubectl get configmap ironic-ca-cert -o jsonpath='{.data.tls\.crt}' > ironic-ca.crt
-ARG VIRTBMC_AGENT_IMAGE=kubevirtbmc/virtbmc:v0.9.0
+ARG VIRTBMC_AGENT_IMAGE=kubevirtbmc/virtbmc:v0.10.0
 
 FROM alpine:3.20 AS certbuilder
 RUN apk add --no-cache ca-certificates

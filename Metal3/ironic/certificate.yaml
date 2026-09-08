@@ -34,10 +34,17 @@ metadata:
   name: ironic-cert
   namespace: baremetal-operator-system
 spec:
+  secretTemplate:
+    labels:
+      environment.metal3.io/ironic-standalone-operator: 'true'
   ipAddresses:
-  - 192.168.222.2
+  # Kind node IP (auto-detected by IRSO as status.hostIP).
+  # Needed for IPA callback and CDI DataVolume ISO download (KubeVirtBMC
+  # virtual media).
+  - 172.18.0.2
   dnsNames:
   - ironic.baremetal-operator-system.svc
+  - ironic.baremetal-operator-system.svc.cluster.local
   issuerRef:
     kind: Issuer
     name: ca-issuer

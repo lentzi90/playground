@@ -1,7 +1,7 @@
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: Metal3MachineTemplate
 metadata:
-  name: test-1-controlplane-plain
+  name: kubevirt-test-1-controlplane
   namespace: default
 spec:
   nodeReuse: false
@@ -9,17 +9,17 @@ spec:
     spec:
       automatedCleaningMode: metadata
       dataTemplate:
-        name: test-1-controlplane-template
+        name: kubevirt-test-1-controlplane-template
       image:
-        checksum: http://192.168.222.1/ubuntu-2404.raw.sha256sum
+        checksum: http://10.96.200.200:8080/ubuntu-2404.img.sha256sum
         checksumType: sha256
-        format: raw
-        url: http://192.168.222.1/ubuntu-2404.raw
+        format: qcow2
+        url: http://10.96.200.200:8080/ubuntu-2404.img
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: Metal3MachineTemplate
 metadata:
-  name: test-1-workers-plain
+  name: kubevirt-test-1-workers
   namespace: default
 spec:
   nodeReuse: false
@@ -27,11 +27,9 @@ spec:
     spec:
       automatedCleaningMode: disabled
       dataTemplate:
-        name: test-1-workers-template
+        name: kubevirt-test-1-workers-template
       image:
-        checksum: http://192.168.222.1/ubuntu-2404.raw.sha256sum
-        # checksum: http://192.168.222.1/centos-stream-10.raw.sha256sum
+        checksum: http://10.96.200.200:8080/ubuntu-2404.img.sha256sum
         checksumType: sha256
-        format: raw
-        url: http://192.168.222.1/ubuntu-2404.raw
-        # url: http://192.168.222.1/centos-stream-10.raw
+        format: qcow2
+        url: http://10.96.200.200:8080/ubuntu-2404.img

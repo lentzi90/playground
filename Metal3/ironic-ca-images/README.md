@@ -3,15 +3,14 @@
 Bakes Ironic's cert-manager-issued CA certificate directly into the
 `cdi-importer` and KubeVirtBMC `virtbmc` agent images, so both trust
 Ironic's HTTPS endpoint without any DataVolume `certConfigMap` field, agent
-env var, or mutating admission webhook. See the "Alternative to the CA
-Webhook" section in `../kubevirtbmc-e2e-results.md` for the full writeup and
-rationale.
+env var, or mutating admission webhook. See the "Key design decisions"
+section in `../README.md` for the full writeup and rationale.
 
 ## Build
 
 ```bash
 # Extract Ironic's CA cert directly from the cert-manager Secret
-# (dev-setup-kubevirtbmc.sh does this automatically in step 9b)
+# (dev-setup.sh does this automatically in step 7b)
 kubectl get secret ironic-cacert -n baremetal-operator-system \
   -o jsonpath='{.data.tls\.crt}' | base64 -d > Metal3/ironic-ca-images/ironic-ca.crt
 
@@ -22,16 +21,16 @@ docker build -f Dockerfile.cdi-importer \
   -t cdi-importer:ironic-ca .
 
 docker build -f Dockerfile.virtbmc-agent \
-  --build-arg VIRTBMC_AGENT_IMAGE=kubevirtbmc/virtbmc:metal3-patch \
-  -t kubevirtbmc/virtbmc:metal3-patch-ca .
+  --build-arg VIRTBMC_AGENT_IMAGE=kubevirtbmc/virtbmc:v0.10.0 \
+  -t kubevirtbmc/virtbmc:v0.10.0-ca .
 
 kind load docker-image cdi-importer:ironic-ca --name <cluster>
-kind load docker-image kubevirtbmc/virtbmc:metal3-patch-ca --name <cluster>
+kind load docker-image kubevirtbmc/virtbmc:v0.10.0-ca --name <cluster>
 ```
 
 ## Deploy
 
-`dev-setup-kubevirtbmc.sh` does this automatically (step 9b). To do it by hand:
+`dev-setup.sh` does this automatically (step 7b). To do it by hand:
 
 ```bash
 kubectl -n cdi set env deployment/cdi-operator \
@@ -39,14 +38,14 @@ kubectl -n cdi set env deployment/cdi-operator \
 
 kubectl -n kubevirtbmc-system patch deployment kubevirtbmc-controller-manager \
   --type=json \
-  -p '[{"op":"replace","path":"/spec/template/spec/containers/0/args/5","value":"--agent-image-tag=metal3-patch-ca"}]'
+  -p '[{"op":"replace","path":"/spec/template/spec/containers/0/args/5","value":"--agent-image-tag=v0.10.0-ca"}]'
 ```
 
 (Adjust the JSON Patch index if the controller's args list differs; find the
 `--agent-image-tag=...` entry's index first with
 `kubectl get deployment kubevirtbmc-controller-manager -n kubevirtbmc-system -o jsonpath='{.spec.template.spec.containers[0].args}'`.)
 
-This is the CA-trust approach used by default in `dev-setup-kubevirtbmc.sh`; no admission webhook is deployed.
+This is the CA-trust approach used by default in `dev-setup.sh`; no admission webhook is deployed.
 
 ## Why this works
 

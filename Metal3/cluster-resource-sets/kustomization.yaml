@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- calico-crs.yaml
+
+# The "calico-cni" ConfigMap wraps the pre-rendered output of ./calico
+# (derived from the shared ../../ClusterResourceSets/calico base) into the
+# ConfigMap referenced by calico-crs.yaml's ClusterResourceSet. Regenerate
+# ./calico.yaml with:
+#   kustomize build Metal3/cluster-resource-sets/calico > Metal3/cluster-resource-sets/calico.yaml
+generatorOptions:
+  disableNameSuffixHash: true
+configMapGenerator:
+- name: calico-cni
+  namespace: default
+  files:
+  - calico.yaml

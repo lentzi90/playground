@@ -1,8 +1,8 @@
 # network-fixups-daemonset.yaml
 #
 # Applies two host-level networking fixups on every Kind node, both required
-# for the KubeVirtBMC + Metal3 dev setup (see kubevirtbmc-e2e-results.md,
-# Key Design Decisions 3 and 7, and the Troubleshooting table):
+# for the KubeVirtBMC + Metal3 dev setup (see ../README.md,
+# Key Design Decisions 3 and 6, and ../troubleshooting.md):
 #
 #   1. proxy_arp on veth interfaces — with KubeVirt bridge networking in
 #      Kind, VMs get a pod-subnet IP via DHCP but see the entire /24 as

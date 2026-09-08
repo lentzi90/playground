@@ -9,7 +9,7 @@
 # Why this exists
 # ----------------
 # The default "pod" network (still used on eth0/net "default", see
-# create-kubevirt-bmhs.sh) is required for provisioning: it's how VMs reach
+# create-bmhs.sh) is required for provisioning: it's how VMs reach
 # Ironic, the in-cluster image server, and the KubeVirtBMC agent before the
 # workload cluster exists. But it CANNOT support ARP-based virtual-IP
 # failover (e.g. kube-vip): gratuitous ARP broadcasts don't propagate beyond
@@ -22,7 +22,7 @@
 # This second network ("baremetal-net") uses the CNI "bridge" plugin, which
 # creates a real Linux bridge (br-baremetal) on the Kind node. All VMs
 # attached to it (via KubeVirt's "bridge" interface binding, see
-# create-kubevirt-bmhs.sh) are genuinely on the same L2 segment — same as a
+# create-bmhs.sh) are genuinely on the same L2 segment — same as a
 # real rack of servers on a switched network. Gratuitous ARP-based VIP
 # failover (kube-vip, ARP mode) was verified to work correctly on this kind
 # of network (immediate 0%-loss reachability, and correct failover redirect
@@ -37,7 +37,7 @@
 #
 # IMPORTANT — one-time host prerequisite:
 #   Kind node images do not ship the "bridge" CNI plugin binary (only
-#   kindnet's own ptp/host-local/loopback/portmap). dev-setup-kubevirtbmc.sh
+#   kindnet's own ptp/host-local/loopback/portmap). dev-setup.sh
 #   downloads it from the containernetworking/plugins release and
 #   `docker cp`s it into /opt/cni/bin on the Kind node before applying this
 #   manifest.

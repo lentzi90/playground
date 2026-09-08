@@ -33,3 +33,4 @@ htpasswd
 
 ClusterResourceSets/calico.yaml
 ClusterResourceSets/cloud-provider-openstack.yaml
+Metal3/cluster-resource-sets/calico.yaml
