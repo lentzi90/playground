@@ -42,4 +42,4 @@ spec:
         kind: OpenStackMachineTemplate
         name: lennart-test-cp
   replicas: 1
-  version: v1.35.0
+  version: v1.37.0

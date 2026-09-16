@@ -10,7 +10,7 @@ spec:
     classRef:
       name: lennart-openstack-v0.1.0
       namespace: default
-    version: v1.35.6
+    version: v1.37.0
     variables:
     - name: identityRef
       value:
