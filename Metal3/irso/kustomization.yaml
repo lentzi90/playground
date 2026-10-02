@@ -8,10 +8,10 @@ resources:
 generatorOptions:
   disableNameSuffixHash: true
 
-configMapGenerator:
-- name: ironic-standalone-operator-ironic-standalone-operator-config
-  namespace: ironic-standalone-operator-system
-  behavior: replace
-  literals:
-  # - IPA_BASEURI=http://192.168.222.1
-  - IPA_BASEURI=https://artifactory.nordix.org/artifactory/openstack-remote-cache/ironic-python-agent/dib
+# configMapGenerator:
+# - name: ironic-standalone-operator-ironic-standalone-operator-config
+#   namespace: ironic-standalone-operator-system
+#   behavior: replace
+#   literals:
+#   # - IPA_BASEURI=http://192.168.222.1
+#   - IPA_BASEURI=https://artifactory.nordix.org/artifactory/openstack-remote-cache/ironic-python-agent/dib
